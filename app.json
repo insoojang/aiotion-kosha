@@ -5,7 +5,18 @@
     "version": "1.0.0",
     "assetBundlePatterns": [
       "**/*"
-    ]
-  },
-  "name": "react-native-ble"
+    ],
+    "ios": {
+      "bundleIdentifier": "io.aiotion.ble.app",
+      "buildNumber": "1.1.0",
+      "supportsTablet": true,
+      "infoPlist": {
+        "CFBundleAllowMixedLocalizations": true
+      }
+    },
+    "locales": {
+      "ko": "./src/locales/locale.constant-ko.json",
+      "en": "./src/locales/locale.constant.json"
+    }
+  }
 }
