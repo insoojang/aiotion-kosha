@@ -5,7 +5,7 @@ import BleManager from 'react-native-ble-manager'
 import { i18nt as t } from '../../utils/i18n'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import { SInfoDetailView, SInfoView } from '../tabs/BluetoothStyle'
-import { debounce, isEmpty } from 'lodash-es'
+import { debounce } from 'lodash-es'
 import Constants from 'expo-constants'
 import { useNavigation } from '@react-navigation/native'
 import { SCREEN } from '../../navigation/constants'
@@ -26,7 +26,7 @@ const Bluetooth = ({}) => {
             console.log('Module initialized')
         })
     })
-
+    const testSelector = useSelector((state) => state.qr)
     const checkDevice = () => {
         if (!Constants.isDevice) {
             const e = new Error(t('error.device'))
@@ -85,8 +85,7 @@ const Bluetooth = ({}) => {
             console.log(results)
         })
     }
-    // const counter = useSelector((state) => state)
-    // console.log('counter', counter)
+
     return (
         <RNView>
             <SInfoView>

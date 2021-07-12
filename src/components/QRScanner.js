@@ -12,11 +12,14 @@ import {
     responsiveScreenWidth,
 } from 'react-native-responsive-dimensions'
 import { useNavigation } from '@react-navigation/native'
+import { useDispatch, useSelector } from 'react-redux'
+import { setUuid } from '../redux/reducers'
 
 const QrScanner = ({ onScan = () => {} }) => {
     const [scanned, setScanned] = useState(false)
     const guidLineLayout = useRef({})
     const navigation = useNavigation()
+    const dispatch = useDispatch()
 
     const isScanArea = (cornerPoints) => {
         const guidLine = [
@@ -72,6 +75,13 @@ const QrScanner = ({ onScan = () => {} }) => {
                 text: t('action.ok'),
                 onPress: () => {
                     onScan(value)
+                    dispatch(
+                        setUuid({
+                            uuid: '123',
+                            resourceKey: '456',
+                            server: '789',
+                        }),
+                    )
                     navigation.goBack()
                 },
             },
