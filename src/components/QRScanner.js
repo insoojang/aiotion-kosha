@@ -12,10 +12,12 @@ import {
     responsiveScreenWidth,
 } from 'react-native-responsive-dimensions'
 import { useNavigation } from '@react-navigation/native'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { setUuid } from '../redux/reducers'
+import { isEmpty } from 'lodash-es'
+import { qrErrorCheck } from '../utils/common'
 
-const QrScanner = ({ onScan = () => {} }) => {
+const QrScanner = () => {
     const [scanned, setScanned] = useState(false)
     const guidLineLayout = useRef({})
     const navigation = useNavigation()
@@ -52,14 +54,32 @@ const QrScanner = ({ onScan = () => {} }) => {
             cornerPoints[3].y < guidLine[3].y
         )
     }
+
     const handleBarCodeScanned = (props, gallery) => {
         const { data, cornerPoints } = props
-        console.log('scanned')
         if (!gallery && !isScanArea(cornerPoints)) {
             return
         }
         setScanned(true)
-        onConfirmSensor(data)
+        if (!isEmpty(data)) {
+            try {
+                let parsingData = JSON.parse(JSON.parse(data))
+                if (qrErrorCheck(parsingData)) {
+                    throw new Error('QR Code not recognized.')
+                }
+                onConfirmSensor(parsingData)
+            } catch (e) {
+                Alert.alert(t('error.qr-recognize'), '', [
+                    {
+                        text: t('action.ok'),
+                        onPress: () => {
+                            setScanned(false)
+                        },
+                    },
+                ])
+                console.error('[ERROR]', e)
+            }
+        }
     }
 
     const onConfirmSensor = (value) => {
@@ -74,15 +94,12 @@ const QrScanner = ({ onScan = () => {} }) => {
             {
                 text: t('action.ok'),
                 onPress: () => {
-                    onScan(value)
-                    dispatch(
-                        setUuid({
-                            uuid: '123',
-                            resourceKey: '456',
-                            server: '789',
-                        }),
-                    )
-                    navigation.goBack()
+                    try {
+                        dispatch(setUuid(value))
+                        navigation.goBack()
+                    } catch (e) {
+                        console.error('[ERROR]', e)
+                    }
                 },
             },
         ])

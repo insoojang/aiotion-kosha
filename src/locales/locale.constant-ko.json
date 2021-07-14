@@ -1,12 +1,17 @@
 {
+    "NSMicrophoneUsageDescription": "사용자가 비디오 및 카메라를 사용하기 위하여 마이크권한이 필요합니다",
     "NSCameraUsageDescription": "사용자가 카메라로 QR 코드를 인식하여 앱의 서버 정보를 제공하는데 필요합니다.",
-    "NSMicrophoneUsageDescription": "사용자가 마이크를 사용하는데 필요합니다.",
+    "NSBluetoothPeripheralUsageDescription": "사용자가 센서와 통신하기 위하여 주변장치 사용 및 탐색 권한이 필요합니다.",
+    "NSBluetoothAlwaysUsageDescription": "사용자가 센서와 통신하기 위하여 블루투스 사용 권한이 필요합니다.",
     "action": {
         "cancel": "취소",
         "ok": "확인",
         "disconnect": "센서 해제",
         "connection": "센서 연결",
-        "sensor-select": "해당 센서로 연결 하시겠습니까?"
+        "sensor-select": "해당 센서로 연결 하시겠습니까?",
+        "connection-success" : "연결 성공",
+        "disconnect-success" : "연결 해제됨",
+        "connection-fail" : "연결 실패"
     },
     "common": {
         "all": "전체",
@@ -31,7 +36,8 @@
         "image-recognize": "이미지로 인식하기"
     },
     "error": {
-        "permission-deny-camera": "카메라 접근 권한이 거부되어 사용이 불가능합니다."
+        "permission-deny-camera": "카메라 접근 권한이 거부되어 사용이 불가능합니다.",
+        "qr-recognize": "QR 코드를 인식할 수 없습니다."
     },
     "title": {
         "qr": "센서 QR 인식",

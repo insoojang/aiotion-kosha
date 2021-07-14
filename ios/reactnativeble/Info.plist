@@ -2,14 +2,20 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+        <key>NSLocationAlwaysUsageDescription</key>
+        <string>Need LocationAlwaysUsageDescription access for using videos</string>
+        <key>NSLocationUsageDescription</key>
+        <string>Need LocationUsageDescription access for using videos</string>
+        <key>NSLocationWhenInUseUsageDescription</key>
+        <string>Need LocationWhenInUseUsageDescription access for using videos</string>
         <key>NSMicrophoneUsageDescription</key>
-        <string>Allow to access your microphone</string>
+        <string>Need microphone access for using videos</string>
         <key>NSCameraUsageDescription</key>
-        <string>Allow to access your camera</string>
+        <string>It is necessary for the user to recognize the QR code with the camera and provide the app's server information</string>
 		<key>NSBluetoothPeripheralUsageDescription</key>
-    	<string>We need to use Bluetooth Peripheral</string>
+    	<string>User need permission to use and browse peripherals to communicate with the sensor.</string>
     	<key>NSBluetoothAlwaysUsageDescription</key>
-    	<string>We need to use Bluetooth</string>
+    	<string>User need permission to use Bluetooth to communicate with the sensor</string>
     	<key>CFBundleDevelopmentRegion</key>
     	<string>en</string>
     	<key>CFBundleDisplayName</key>
@@ -32,8 +38,6 @@
     	<string>1</string>
     	<key>LSRequiresIPhoneOS</key>
     	<true/>
-    	<key>NFCReaderUsageDescription</key>
-    	<string>We need to use NFC</string>
     	<key>NSAppTransportSecurity</key>
     	<dict>
     		<key>NSAllowsArbitraryLoads</key>
@@ -67,16 +71,6 @@
     	<key>com.apple.developer.associated-domains</key>
     	<array>
     		<string>applinks:example.com</string>
-    	</array>
-    	<key>com.apple.developer.nfc.readersession.formats</key>
-    	<array>
-    		<string>NDEF</string>
-    		<string>TAG</string>
-    	</array>
-    	<key>com.apple.developer.nfc.readersession.iso7816.select-identifiers</key>
-    	<array>
-    		<string>D2760000850100</string>
-    		<string>D2760000850101</string>
     	</array>
     </dict>
     </plist>

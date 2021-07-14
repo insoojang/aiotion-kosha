@@ -1,12 +1,17 @@
 {
+    "NSMicrophoneUsageDescription": "Need microphone access for using videos.",
     "NSCameraUsageDescription": "It is necessary for the user to recognize the QR code with the camera and provide the app's server information.",
-    "NSMicrophoneUsageDescription": "Required for users to access Microphone.",
+    "NSBluetoothPeripheralUsageDescription": "User need permission to use and browse peripherals to communicate with the sensor.",
+    "NSBluetoothAlwaysUsageDescription": "User need permission to use Bluetooth to communicate with the sensor.",
     "action": {
         "cancel": "Cancel",
         "ok": "OK",
         "disconnect": "Disconnect",
         "connection": "Connection",
-        "sensor-select": "Do you want to connect to that sensor?"
+        "sensor-select": "Do you want to connect to that sensor?",
+        "connection-success" : "Connection success",
+        "disconnect-success" : "Disconnected",
+        "connection-fail" : "Connection failed"
     },
     "common": {
         "all": "All",
@@ -31,7 +36,8 @@
         "image-recognize": "Recognizing as an image"
     },
     "error": {
-        "permission-deny-camera": "Camera access is denied and cannot be used."
+        "permission-deny-camera": "Camera access is denied and cannot be used.",
+        "invalid-qr": "Invalid QR Code"
     },
     "title": {
         "qr": "센서 QR 인식",
