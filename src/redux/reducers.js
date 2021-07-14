@@ -5,6 +5,7 @@ const QR_STATE = {
     resourceKey: '',
     server: '',
 }
+// "uuid":"E7465DFB-8E9A-D2BA-65F5-68365089F423","resourceKey":"4100","server":"http://192.168.234.24"
 export const qrSlice = createSlice({
     name: 'uuid',
     initialState: QR_STATE,
