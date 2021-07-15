@@ -671,6 +671,7 @@ $RECYCLE.BIN/
 /android/build/
 # CocoaPods
 /ios/Pods/
+project.pbxproj
 # Bundle artifacts
 *.jsbundle
 /android/app/src/debug/
