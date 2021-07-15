@@ -1,9 +1,15 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import { Alert, NativeEventEmitter, NativeModules } from 'react-native'
+import React, { useCallback, useEffect, useState, useRef } from 'react'
+import {
+    Alert,
+    NativeEventEmitter,
+    NativeModules,
+    Keyboard,
+    TouchableWithoutFeedback,
+} from 'react-native'
 import { Button, Input, Text } from 'react-native-elements'
 import BleManager from 'react-native-ble-manager'
 import { useNavigation } from '@react-navigation/native'
-import { i18nt as t } from '../../utils/i18n'
+import { i18nt } from '../../utils/i18n'
 import { useDispatch, useSelector } from 'react-redux'
 import { debounce, isEmpty } from 'lodash-es'
 
@@ -20,7 +26,7 @@ import Constants from 'expo-constants'
 import { SCREEN } from '../../navigation/constants'
 import { Camera } from 'expo-camera'
 import { clearUuid } from '../../redux/reducers'
-import { qrErrorCheck } from '../../utils/common'
+import { fastenedMessage, qrErrorCheck } from '../../utils/common'
 import { saveBluetooteData } from '../../service/api/bluetooth.service'
 import { fontSizeSet } from '../../styles/size'
 import { colorSet } from '../../styles/colors'
@@ -30,7 +36,7 @@ const bleManagerEmitter = new NativeEventEmitter(BleManagerModule)
 
 const Bluetooth = ({}) => {
     const [connectionState, setConnectionState] = useState(false)
-    const [safetySate, setSafetyState] = useState('-')
+    const [fastened, setFastened] = useState('-')
     const [name, setName] = useState('')
     const [date, setDate] = useState('')
     const [errorMessage, setErrorMessage] = useState('')
@@ -41,11 +47,11 @@ const Bluetooth = ({}) => {
     const warnAlert = (message, e) => {
         console.error('[ERROR]', e)
         return Alert.alert(
-            !isEmpty(message) ? message : t('action.connection-fail'),
+            !isEmpty(message) ? message : i18nt('action.connection-fail'),
             '',
             [
                 {
-                    text: t('action.ok'),
+                    text: i18nt('action.ok'),
                     onPress: () => {
                         setConnectionState(false)
                     },
@@ -56,11 +62,11 @@ const Bluetooth = ({}) => {
 
     const successAlert = (message) =>
         Alert.alert(
-            !isEmpty(message) ? message : t('action.connection-success'),
+            !isEmpty(message) ? message : i18nt('action.connection-success'),
             '',
             [
                 {
-                    text: t('action.ok'),
+                    text: i18nt('action.ok'),
                 },
             ],
         )
@@ -81,21 +87,25 @@ const Bluetooth = ({}) => {
         }
     }, 200)
     const onDisconnect = useCallback(
-        debounce((peripheral) => {
+        debounce((peripheral, message) => {
             if (peripheral?.uuid) {
                 BleManager.disconnect(peripheral.uuid)
                     .then(() => {
-                        Alert.alert(t('action.disconnect-success'), '', [
-                            {
-                                text: t('action.ok'),
-                            },
-                        ])
+                        Alert.alert(
+                            message || i18nt('action.disconnect-success'),
+                            '',
+                            [
+                                {
+                                    text: i18nt('action.ok'),
+                                },
+                            ],
+                        )
                         dispatch(clearUuid())
                     })
                     .catch((e) => {
-                        Alert.alert(t('action.connection-fail'), '', [
+                        Alert.alert(i18nt('action.connection-fail'), '', [
                             {
-                                text: t('action.ok'),
+                                text: i18nt('action.ok'),
                             },
                         ])
                         console.error('[Error]', e)
@@ -118,17 +128,16 @@ const Bluetooth = ({}) => {
     )
     const checkDevice = () => {
         if (!Constants.isDevice) {
-            const e = new Error(t('error.device'))
+            const e = new Error(i18nt('error.device'))
             e.name = 'device'
             throw e
         }
     }
 
     const checkNameAndDate = () => {
-        console.log(date, name)
         if (isEmpty(name) || isEmpty(date)) {
-            setErrorMessage(t('error.name-date'))
-            const e = new Error(t('error.name-date'))
+            setErrorMessage(i18nt('error.name-date'))
+            const e = new Error(i18nt('error.name-date'))
             e.name = 'Empty name and date of birth'
             throw e
         } else {
@@ -141,7 +150,7 @@ const Bluetooth = ({}) => {
         if (status === 'granted') {
             navigation.navigate(SCREEN.QR)
         } else {
-            warnAlert(t('error.permission-deny-camera'), 'Camera Auth')
+            warnAlert(i18nt('error.permission-deny-camera'), 'Camera Auth')
         }
     }
 
@@ -156,38 +165,42 @@ const Bluetooth = ({}) => {
                         '0xFFF0',
                         '0xFFF2',
                     )
-                    setConnectionState(true)
+                    setFastened('01')
                     bleManagerEmitter.addListener(
                         'BleManagerDidUpdateValueForCharacteristic',
                         ({ value }) => {
                             // Convert bytes array to string
-                            console.log(
-                                `Recieved@@@ ${String.fromCharCode(...value)} `,
-                            )
-                            const { resourceKey, server } = qrValue
+                            const { resourceId, server } = qrValue
+                            //fastenedState :
+                            // 11 : normal connection
+                            // 10 : Abnormal connection
+                            // 01 : disConnected
+                            // 00 : disConnected
+                            const fastenedState = !isEmpty(value)
+                                ? String.fromCharCode(...value)
+                                : '-'
+                            setFastened(fastenedState)
                             const param = {
                                 empName: name,
                                 empBirth: date,
                                 connected: true,
-                                fastened: !isEmpty(value)
-                                    ? String.fromCharCode(...value)
-                                    : null,
+                                fastened: fastenedState,
                             }
                             saveBluetooteData({
                                 url: server,
-                                resourceKey,
+                                resourceId,
                                 param,
                             })
                                 .then((r) => {
                                     console.log('service Success', r)
                                 })
                                 .catch((e) => {
-                                    warnAlert(t('error.server'), e)
+                                    onDisconnect(qrValue, i18nt('error.server'))
                                 })
                         },
                     )
                 } catch (e) {
-                    warnAlert(null, e)
+                    onDisconnect(qrValue, i18nt('action.connection-fail'))
                 }
             } else {
                 onDisconnect(qrValue)
@@ -202,11 +215,12 @@ const Bluetooth = ({}) => {
             onConnectAndPrepare(qrValue.uuid)
                 .then(() => {
                     if (!connectionState) {
+                        setConnectionState(true)
                         successAlert()
                     }
                 })
                 .catch((e) => {
-                    warnAlert(null, 'e')
+                    warnAlert(null, e)
                 })
         }
     }, [qrValue])
@@ -241,94 +255,124 @@ const Bluetooth = ({}) => {
 
     return (
         <>
-            <SInfoView>
-                <SInfoDetailView>
-                    <SText_label>
-                        {t('common.name')}
-                    </SText_label>
-                    <Input
-                        disabledInputStyle={{ background: '#ddd' }}
-                        containerStyle={{
-                            paddingHorizontal: 0,
-                        }}
-                        inputContainerStyle={{
-                            backgroundColor: colorSet.primaryBg,
-                            borderColor: 'transparent',
-                            paddingHorizontal: 10,
-                        }}
-                        inputStyle={{
-                            fontSize: fontSizeSet.sm,
-                            color: colorSet.normalTextColor,
-                        }}
-                        errorMessage={errorMessage}
-                        onChangeText={onChangeName}
-                        clearButtonMode="always"
-                        rightIcon={<Icon name="pencil" size={20} />}
-                    />
-                </SInfoDetailView>
-                <SInfoDetailView>
-                    <SText_label>
-                        {t('common.date-of-birth')}
-                    </SText_label>
-                    <Input
-                        disabledInputStyle={{ background: '#ddd' }}
-                        containerStyle={{
-                            paddingHorizontal: 0,
-                        }}
-                        inputContainerStyle={{
-                            backgroundColor: colorSet.primaryBg,
-                            borderColor: 'transparent',
-                            paddingHorizontal: 10,
-                        }}
-                        inputStyle={{
-                            fontSize: fontSizeSet.sm,
-                            color: colorSet.normalTextColor,
-                        }}
-                        errorMessage={errorMessage}
-                        onChangeText={onChangeDate}
-                        clearButtonMode="always"
-                        rightIcon={<Icon name="pencil" size={20} color={colorSet.normalTextColor} />}
-                        placeholder="YY/MM/DD"
-                    />
-                </SInfoDetailView>
-                <SInfoDetailView>
-                    <SText_label>
-                        {t('common.connection-status')}
-                    </SText_label>
-                    <SView_ConnectStateWrap connectionState>
-                        <SText_ConnectState>{connectionState ? t('sensor.on') : t('sensor.off')}</SText_ConnectState>
-                    </SView_ConnectStateWrap>
-                </SInfoDetailView>
-                <SInfoDetailView>
-                    <SText_label>
-                        {t('common.fail-safe')}
-                    </SText_label>
-                    <Text
-                        style={{
-                            textAlign: 'center',
-                            fontSize: fontSizeSet.lg
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <SInfoView>
+                    <SInfoDetailView>
+                        <SText_label>{i18nt('common.name')}</SText_label>
+                        <Input
+                            disabledInputStyle={{ background: '#ddd' }}
+                            containerStyle={{
+                                paddingHorizontal: 0,
+                            }}
+                            inputContainerStyle={{
+                                backgroundColor: colorSet.primaryBg,
+                                borderColor: 'transparent',
+                                paddingHorizontal: 10,
+                            }}
+                            inputStyle={{
+                                fontSize: fontSizeSet.sm,
+                                color: colorSet.normalTextColor,
+                            }}
+                            errorMessage={errorMessage}
+                            onChangeText={onChangeName}
+                            clearButtonMode="always"
+                            rightIcon={<Icon name="pencil" size={20} />}
+                            placeholder={i18nt('common.enter-name')}
+                            disabled={connectionState}
+                            maxLength={10}
+                        />
+                    </SInfoDetailView>
+                    <SInfoDetailView>
+                        <SText_label>
+                            {i18nt('common.date-of-birth')}
+                        </SText_label>
+                        <Input
+                            disabledInputStyle={{ background: '#ddd' }}
+                            containerStyle={{
+                                paddingHorizontal: 0,
+                            }}
+                            inputContainerStyle={{
+                                backgroundColor: colorSet.primaryBg,
+                                borderColor: 'transparent',
+                                paddingHorizontal: 10,
+                            }}
+                            inputStyle={{
+                                fontSize: fontSizeSet.sm,
+                                color: colorSet.normalTextColor,
+                            }}
+                            errorMessage={errorMessage}
+                            onChangeText={(value) => {
+                                onChangeDate(value)
+                                if (value.length >= 6) {
+                                    Keyboard.dismiss()
+                                }
+                            }}
+                            clearButtonMode="always"
+                            rightIcon={
+                                <Icon
+                                    name="pencil"
+                                    size={20}
+                                    color={colorSet.normalTextColor}
+                                />
+                            }
+                            placeholder="YY/MM/DD"
+                            disabled={connectionState}
+                            keyboardType="numeric"
+                            maxLength={7}
+                        />
+                    </SInfoDetailView>
+                    <SInfoDetailView>
+                        <SText_label>
+                            {i18nt('common.connection-status')}
+                        </SText_label>
+                        <SView_ConnectStateWrap
+                            connectionState={connectionState}
+                        >
+                            <SText_ConnectState>
+                                {connectionState
+                                    ? i18nt('sensor.on')
+                                    : i18nt('sensor.off')}
+                            </SText_ConnectState>
+                        </SView_ConnectStateWrap>
+                    </SInfoDetailView>
+                    <SInfoDetailView>
+                        <SText_label>{i18nt('common.fail-safe')}</SText_label>
+                        <Text
+                            style={{
+                                textAlign: 'center',
+                                fontSize: fontSizeSet.lg,
+                            }}
+                        >
+                            {fastenedMessage(fastened)}
+                        </Text>
+                    </SInfoDetailView>
+                </SInfoView>
+            </TouchableWithoutFeedback>
 
-                        }}
-                    >
-                        {safetySate}
-                    </Text>
-                </SInfoDetailView>
-            </SInfoView>
             <SView_buttonGroup>
                 <Button
-                    buttonStyle={{ height: 50, fontSize: fontSizeSet.base, marginBottom: 15, backgroundColor: colorSet.primary }}
+                    buttonStyle={{
+                        height: 50,
+                        fontSize: fontSizeSet.base,
+                        marginBottom: 15,
+                        backgroundColor: colorSet.primary,
+                    }}
                     onPress={onConnect}
-                    title={t('action.connection')}
+                    title={i18nt('action.connection')}
                     disabled={connectionState}
                 />
                 <Button
                     type="outline"
-                    buttonStyle={{ height: 50, fontSize: fontSizeSet.base, borderColor: colorSet.primary }}
+                    buttonStyle={{
+                        height: 50,
+                        fontSize: fontSizeSet.base,
+                        borderColor: colorSet.primary,
+                    }}
                     titleStyle={{ color: colorSet.primary }}
                     onPress={() => {
                         onDisconnect(qrValue)
                     }}
-                    title={t('action.disconnect')}
+                    title={i18nt('action.disconnect')}
                     disabled={!connectionState}
                 />
             </SView_buttonGroup>

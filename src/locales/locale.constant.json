@@ -18,11 +18,16 @@
         "name": "name",
         "date-of-birth" : "Date of birth",
         "connection-status": "Connection Status",
-        "fail-safe": "Fail Safe"
+        "fail-safe": "Fail Safe",
+        "enter-name": "Please enter name"
+
     },
     "sensor": {
         "on": "connect",
-        "off": "disconnect"
+        "off": "disconnect",
+        "normal-connection": "Normal Connection",
+        "abnormal-connection": "[Warning]: Abnormal connection",
+        "disConnected": "DisConnected"
     },
     "qr": {
         "subscription": "If you fit the QR code and barcode within the guide line, it will be automatically recognized.",

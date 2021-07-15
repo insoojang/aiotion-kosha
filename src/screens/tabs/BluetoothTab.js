@@ -1,11 +1,11 @@
 import React from 'react'
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import { ScrollView, TouchableOpacity } from 'react-native'
 import { S_BluetoothView } from './BluetoothStyle'
 import Bluetooth from '../Bluetooth'
 import { colorSet } from '../../styles/colors'
 import { responsiveHeight } from 'react-native-responsive-dimensions'
 
-const BluetoothTab = (props) => {
+const BluetoothTab = () => {
     return (
         <S_BluetoothView>
             <ScrollView

@@ -6,7 +6,7 @@ import {
     SQRView,
     SView_GuidLineWrapper,
 } from './QRScannerStyle'
-import { i18nt as t } from '../utils/i18n'
+import { i18nt } from '../utils/i18n'
 import {
     responsiveScreenHeight,
     responsiveScreenWidth,
@@ -63,15 +63,15 @@ const QrScanner = () => {
         setScanned(true)
         if (!isEmpty(data)) {
             try {
-                let parsingData = JSON.parse(JSON.parse(data))
+                let parsingData = JSON.parse(data)
                 if (qrErrorCheck(parsingData)) {
                     throw new Error('QR Code not recognized.')
                 }
                 onConfirmSensor(parsingData)
             } catch (e) {
-                Alert.alert(t('error.qr-recognize'), '', [
+                Alert.alert(i18nt('error.qr-recognize'), '', [
                     {
-                        text: t('action.ok'),
+                        text: i18nt('action.ok'),
                         onPress: () => {
                             setScanned(false)
                         },
@@ -83,16 +83,16 @@ const QrScanner = () => {
     }
 
     const onConfirmSensor = (value) => {
-        Alert.alert(t('action.sensor-select'), '', [
+        Alert.alert(i18nt('action.sensor-select'), '', [
             {
-                text: t('action.cancel'),
+                text: i18nt('action.cancel'),
                 style: 'cancel',
                 onPress: () => {
                     setScanned(false)
                 },
             },
             {
-                text: t('action.ok'),
+                text: i18nt('action.ok'),
                 onPress: () => {
                     try {
                         dispatch(setUuid(value))
@@ -125,7 +125,7 @@ const QrScanner = () => {
                     }}
                 />
             </SView_GuidLineWrapper>
-            <SQRSubscription>{t('qr.subscription')}</SQRSubscription>
+            <SQRSubscription>{i18nt('qr.subscription')}</SQRSubscription>
         </SQRView>
     )
 }
