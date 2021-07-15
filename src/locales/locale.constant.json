@@ -37,10 +37,13 @@
     },
     "error": {
         "permission-deny-camera": "Camera access is denied and cannot be used.",
-        "invalid-qr": "Invalid QR Code"
+        "invalid-qr": "Invalid QR Code",
+        "server" : "Internal Server Error",
+        "name-date" : "Please enter your name and date of birth.",
+        "device": "can not be ues if running in a simulator or emulator."
     },
     "title": {
-        "qr": "센서 QR 인식",
+        "qr": "QR Code Scan",
         "main": "Kosha Safety System"
     }
 }

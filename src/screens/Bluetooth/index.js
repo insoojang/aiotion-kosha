@@ -19,6 +19,7 @@ import { SCREEN } from '../../navigation/constants'
 import { Camera } from 'expo-camera'
 import { clearUuid } from '../../redux/reducers'
 import { qrErrorCheck } from '../../utils/common'
+import { saveBluetooteData } from '../../service/api/bluetooth.service'
 
 const BleManagerModule = NativeModules.BleManager
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule)
@@ -26,6 +27,9 @@ const bleManagerEmitter = new NativeEventEmitter(BleManagerModule)
 const Bluetooth = ({}) => {
     const [connectionState, setConnectionState] = useState(false)
     const [safetySate, setSafetyState] = useState('-')
+    const [name, setName] = useState('')
+    const [date, setDate] = useState('')
+    const [errorMessage, setErrorMessage] = useState('')
     const dispatch = useDispatch()
     const navigation = useNavigation()
     const qrValue = useSelector((state) => state.qr)
@@ -57,24 +61,21 @@ const Bluetooth = ({}) => {
             ],
         )
 
-    const onConnect = useCallback(
-        debounce((url) => {
-            try {
-                checkDevice()
-                getCameraPermission(url)
-                    .then(() => {
-                        console.log('Success Camera Permission.')
-                    })
-                    .catch((e) => {
-                        console.error('[ERROR]', e)
-                    })
-            } catch (e) {
-                console.error('[ERROR]', e)
-            }
-        }, 200),
-        [],
-    )
-
+    const onConnect = debounce(() => {
+        try {
+            checkNameAndDate()
+            checkDevice()
+            getCameraPermission()
+                .then(() => {
+                    console.log('Success Camera Permission.')
+                })
+                .catch((e) => {
+                    console.error('[ERROR]', e)
+                })
+        } catch (e) {
+            console.error('[ERROR]', e)
+        }
+    }, 200)
     const onDisconnect = useCallback(
         debounce((peripheral) => {
             if (peripheral?.uuid) {
@@ -99,12 +100,35 @@ const Bluetooth = ({}) => {
         }, 200),
         [],
     )
-
+    const onChangeName = useCallback(
+        debounce((name) => {
+            setName(name)
+        }, 200),
+        [],
+    )
+    const onChangeDate = useCallback(
+        debounce((date) => {
+            setDate(date)
+        }, 200),
+        [],
+    )
     const checkDevice = () => {
         if (!Constants.isDevice) {
             const e = new Error(t('error.device'))
             e.name = 'device'
             throw e
+        }
+    }
+
+    const checkNameAndDate = () => {
+        console.log(date, name)
+        if (isEmpty(name) || isEmpty(date)) {
+            setErrorMessage(t('error.name-date'))
+            const e = new Error(t('error.name-date'))
+            e.name = 'Empty name and date of birth'
+            throw e
+        } else {
+            setErrorMessage('')
         }
     }
 
@@ -128,6 +152,7 @@ const Bluetooth = ({}) => {
                         '0xFFF0',
                         '0xFFF2',
                     )
+                    setConnectionState(true)
                     bleManagerEmitter.addListener(
                         'BleManagerDidUpdateValueForCharacteristic',
                         ({ value }) => {
@@ -135,6 +160,26 @@ const Bluetooth = ({}) => {
                             console.log(
                                 `Recieved@@@ ${String.fromCharCode(...value)} `,
                             )
+                            const { resourceKey, server } = qrValue
+                            const param = {
+                                empName: name,
+                                empBirth: date,
+                                connected: true,
+                                fastened: !isEmpty(value)
+                                    ? String.fromCharCode(...value)
+                                    : null,
+                            }
+                            saveBluetooteData({
+                                url: server,
+                                resourceKey,
+                                param,
+                            })
+                                .then((r) => {
+                                    console.log('service Success', r)
+                                })
+                                .catch((e) => {
+                                    warnAlert(t('error.server'), e)
+                                })
                         },
                     )
                 } catch (e) {
@@ -167,11 +212,11 @@ const Bluetooth = ({}) => {
         bleManagerEmitter.addListener('BleManagerDisconnectPeripheral', () => {
             setConnectionState(false)
         })
-        bleManagerEmitter.addListener('BleManagerConnectPeripheral', (args) => {
-            if (args && !isEmpty(args.peripheral)) {
-                setConnectionState(true)
-            }
-        })
+        // bleManagerEmitter.addListener('BleManagerConnectPeripheral', (args) => {
+        //     if (args && !isEmpty(args.peripheral)) {
+        //         setConnectionState(true)
+        //     }
+        // })
         return () => {
             setConnectionState(false)
             onDisconnect(qrValue)
@@ -181,12 +226,12 @@ const Bluetooth = ({}) => {
                     setConnectionState(false)
                 },
             )
-            bleManagerEmitter.removeListener(
-                'BleManagerConnectPeripheral',
-                () => {
-                    setConnectionState(false)
-                },
-            )
+            // bleManagerEmitter.removeListener(
+            //     'BleManagerConnectPeripheral',
+            //     () => {
+            //         setConnectionState(false)
+            //     },
+            // )
         }
     }, [])
 
@@ -200,10 +245,10 @@ const Bluetooth = ({}) => {
                     <Input
                         containerStyle={{ flex: 8 }}
                         disabledInputStyle={{ background: '#ddd' }}
-                        // errorMessage="Oops! that's not correct."
+                        errorMessage={errorMessage}
+                        onChangeText={onChangeName}
                         clearButtonMode="always"
                         rightIcon={<Icon name="pencil" size={20} />}
-                        // placeholder="생년월일을 입력하세요."
                     />
                 </SInfoDetailView>
                 <SInfoDetailView>
@@ -213,10 +258,11 @@ const Bluetooth = ({}) => {
                     <Input
                         containerStyle={{ flex: 11 }}
                         disabledInputStyle={{ background: '#ddd' }}
-                        // errorMessage="Oops! that's not correct."
+                        errorMessage={errorMessage}
+                        onChangeText={onChangeDate}
                         clearButtonMode="always"
                         rightIcon={<Icon name="pencil" size={20} />}
-                        // placeholder="생년월일을 입력하세요."
+                        placeholder="YY/MM/DD"
                     />
                 </SInfoDetailView>
                 <SInfoDetailView>
