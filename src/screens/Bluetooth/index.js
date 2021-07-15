@@ -1,10 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import {
-    Alert,
-    NativeEventEmitter,
-    NativeModules,
-    View as RNView,
-} from 'react-native'
+import { Alert, NativeEventEmitter, NativeModules } from 'react-native'
 import { Button, Input, Text } from 'react-native-elements'
 import BleManager from 'react-native-ble-manager'
 import { useNavigation } from '@react-navigation/native'
@@ -13,13 +8,22 @@ import { useDispatch, useSelector } from 'react-redux'
 import { debounce, isEmpty } from 'lodash-es'
 
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
-import { SInfoDetailView, SInfoView } from '../tabs/BluetoothStyle'
+import {
+    SInfoDetailView,
+    SInfoView,
+    SText_ConnectState,
+    SText_label,
+    SView_buttonGroup,
+    SView_ConnectStateWrap,
+} from '../tabs/BluetoothStyle'
 import Constants from 'expo-constants'
 import { SCREEN } from '../../navigation/constants'
 import { Camera } from 'expo-camera'
 import { clearUuid } from '../../redux/reducers'
 import { qrErrorCheck } from '../../utils/common'
 import { saveBluetooteData } from '../../service/api/bluetooth.service'
+import { fontSizeSet } from '../../styles/size'
+import { colorSet } from '../../styles/colors'
 
 const BleManagerModule = NativeModules.BleManager
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule)
@@ -236,15 +240,26 @@ const Bluetooth = ({}) => {
     }, [])
 
     return (
-        <RNView>
+        <>
             <SInfoView>
                 <SInfoDetailView>
-                    <Text style={{ flex: 2.9 }} h4>
+                    <SText_label>
                         {t('common.name')}
-                    </Text>
+                    </SText_label>
                     <Input
-                        containerStyle={{ flex: 8 }}
                         disabledInputStyle={{ background: '#ddd' }}
+                        containerStyle={{
+                            paddingHorizontal: 0,
+                        }}
+                        inputContainerStyle={{
+                            backgroundColor: colorSet.primaryBg,
+                            borderColor: 'transparent',
+                            paddingHorizontal: 10,
+                        }}
+                        inputStyle={{
+                            fontSize: fontSizeSet.sm,
+                            color: colorSet.normalTextColor,
+                        }}
                         errorMessage={errorMessage}
                         onChangeText={onChangeName}
                         clearButtonMode="always"
@@ -252,58 +267,72 @@ const Bluetooth = ({}) => {
                     />
                 </SInfoDetailView>
                 <SInfoDetailView>
-                    <Text style={{ flex: 4 }} h4>
+                    <SText_label>
                         {t('common.date-of-birth')}
-                    </Text>
+                    </SText_label>
                     <Input
-                        containerStyle={{ flex: 11 }}
                         disabledInputStyle={{ background: '#ddd' }}
+                        containerStyle={{
+                            paddingHorizontal: 0,
+                        }}
+                        inputContainerStyle={{
+                            backgroundColor: colorSet.primaryBg,
+                            borderColor: 'transparent',
+                            paddingHorizontal: 10,
+                        }}
+                        inputStyle={{
+                            fontSize: fontSizeSet.sm,
+                            color: colorSet.normalTextColor,
+                        }}
                         errorMessage={errorMessage}
                         onChangeText={onChangeDate}
                         clearButtonMode="always"
-                        rightIcon={<Icon name="pencil" size={20} />}
+                        rightIcon={<Icon name="pencil" size={20} color={colorSet.normalTextColor} />}
                         placeholder="YY/MM/DD"
                     />
                 </SInfoDetailView>
                 <SInfoDetailView>
-                    <Text style={{ flex: 4 }} h4>
+                    <SText_label>
                         {t('common.connection-status')}
-                    </Text>
-                    <Text
-                        style={{
-                            flex: 4,
-                            color: connectionState ? 'green' : 'red',
-                        }}
-                        h4
-                    >
-                        {connectionState ? t('sensor.on') : t('sensor.off')}
-                    </Text>
+                    </SText_label>
+                    <SView_ConnectStateWrap connectionState>
+                        <SText_ConnectState>{connectionState ? t('sensor.on') : t('sensor.off')}</SText_ConnectState>
+                    </SView_ConnectStateWrap>
                 </SInfoDetailView>
                 <SInfoDetailView>
-                    <Text style={{ flex: 4 }} h4>
+                    <SText_label>
                         {t('common.fail-safe')}
-                    </Text>
-                    <Text style={{ flex: 4 }} h4>
+                    </SText_label>
+                    <Text
+                        style={{
+                            textAlign: 'center',
+                            fontSize: fontSizeSet.lg
+
+                        }}
+                    >
                         {safetySate}
                     </Text>
                 </SInfoDetailView>
             </SInfoView>
-            <Button
-                buttonStyle={{ height: 50, marginHorizontal: 25 }}
-                onPre
-                onPress={onConnect}
-                title={t('action.connection')}
-                disabled={connectionState}
-            />
-            <Button
-                buttonStyle={{ height: 50, marginHorizontal: 25 }}
-                onPress={() => {
-                    onDisconnect(qrValue)
-                }}
-                title={t('action.disconnect')}
-                disabled={!connectionState}
-            />
-        </RNView>
+            <SView_buttonGroup>
+                <Button
+                    buttonStyle={{ height: 50, fontSize: fontSizeSet.base, marginBottom: 15, backgroundColor: colorSet.primary }}
+                    onPress={onConnect}
+                    title={t('action.connection')}
+                    disabled={connectionState}
+                />
+                <Button
+                    type="outline"
+                    buttonStyle={{ height: 50, fontSize: fontSizeSet.base, borderColor: colorSet.primary }}
+                    titleStyle={{ color: colorSet.primary }}
+                    onPress={() => {
+                        onDisconnect(qrValue)
+                    }}
+                    title={t('action.disconnect')}
+                    disabled={!connectionState}
+                />
+            </SView_buttonGroup>
+        </>
     )
 }
 
