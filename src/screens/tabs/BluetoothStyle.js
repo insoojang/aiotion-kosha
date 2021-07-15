@@ -30,9 +30,9 @@ SText_label.displayName = 'SText_label'
 
 export const SView_ConnectStateWrap = styled.View`
   border-width: 1px;
-  border-color: ${(prop) => prop.connectionState ? 'rgba(245, 95, 77, 0.2)' : 'rgba(77, 245, 11, 0.2)'};
+  border-color: ${(prop) => prop.connectionState ? 'rgba(77, 245, 11, 0.2)': 'rgba(245, 95, 77, 0.2)'};
   border-radius: 4px;
-  background: ${(prop) => prop.connectionState ?  'rgba(245, 95, 77, 0.1)' : 'rgba(77, 245, 11, 0.1)'};
+  background: ${(prop) => prop.connectionState ? 'rgba(77, 245, 11, 0.1)' : 'rgba(245, 95, 77, 0.1)'};
 `
 SView_ConnectStateWrap.displayName = 'SView_ConnectStateWrap'
 

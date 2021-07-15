@@ -15,17 +15,17 @@ i18n.translations = {
 i18n.fallbacks = true
 
 export const i18nt = (
-    scope: string,
-    options?: any,
-    locale?: string,
-): string => {
+    scope,
+    options,
+    locale,
+) => {
     const currentLocale = locale ?? Localization.locale.split('-')[0]
     return i18n.t(scope, { locale: currentLocale, ...options })
 }
 
 //  resourceTypeKey를 locale하기 위한 func
 //  '.'을 '-'로 replace
-export const i18ntBy = (resourceTypeKey: string): string => {
+export const i18ntBy = (resourceTypeKey) => {
     const replaced = resourceTypeKey.replace(/\./g, '-')
     return i18nt(`resourceTypes.${replaced}`)
 }

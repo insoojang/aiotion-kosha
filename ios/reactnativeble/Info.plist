@@ -2,12 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-        <key>NSLocationAlwaysUsageDescription</key>
-        <string>Need LocationAlwaysUsageDescription access for using videos</string>
-        <key>NSLocationUsageDescription</key>
-        <string>Need LocationUsageDescription access for using videos</string>
-        <key>NSLocationWhenInUseUsageDescription</key>
-        <string>Need LocationWhenInUseUsageDescription access for using videos</string>
         <key>NSMicrophoneUsageDescription</key>
         <string>Need microphone access for using videos</string>
         <key>NSCameraUsageDescription</key>

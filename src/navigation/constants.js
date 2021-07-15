@@ -1,7 +1,7 @@
-import { i18nt as t } from '../utils/i18n'
+import { i18nt } from '../utils/i18n'
 
 export const SCREEN = {
     Bluetooth: 'Bluetooth',
-    QR: t('title.qr'),
-    Main: t('title.main'),
+    QR: i18nt('title.qr'),
+    Main: i18nt('title.main'),
 }

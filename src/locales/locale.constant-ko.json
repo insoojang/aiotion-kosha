@@ -18,11 +18,20 @@
         "name": "이름",
         "date-of-birth": "생년월일",
         "connection-status": "연결상태",
-        "fail-safe": "체결여부"
+        "fail-safe": "체결여부",
+        "enter-name": "이름을 입력해주세요"
     },
     "sensor": {
         "on": "연결됨",
-        "off": "연결 안됨"
+        "off": "연결 안됨",
+        "normal-connection": "안전 체결",
+        "abnormal-connection": "[경고]:역방향 체결",
+        "disConnected": "체결 안됨"
+    },
+    "rope": {
+        "on": "체결됨",
+        "off": "체결 안됨",
+        "unsafe": "[경고]:불안전 체결"
     },
     "qr": {
         "subscription": "안내선 안에 QR 코드 및 바코드를 맞추면 자동으로 인식됩니다.",
@@ -44,6 +53,6 @@
     },
     "title": {
         "qr": "센서 QR 인식",
-        "main": "Kosha 안전 시스템"
+        "main": "추락방지 안전 시스템"
     }
 }
