@@ -1,6 +1,5 @@
 import { isEmpty } from 'lodash-es'
 import { i18nt } from './i18n'
-import listCacheGet from 'lodash-es/_listCacheGet'
 
 export const qrErrorCheck = (value) => {
     if (typeof value !== 'object') {
