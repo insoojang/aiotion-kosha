@@ -1,12 +1,6 @@
-import React, { useCallback, useEffect, useState, useRef } from 'react'
-import {
-    Alert,
-    NativeEventEmitter,
-    NativeModules,
-    Keyboard,
-    TouchableWithoutFeedback,
-} from 'react-native'
-import { Button, Input, Text } from 'react-native-elements'
+import React, { useCallback, useEffect, useState } from 'react'
+import { Alert, Keyboard, NativeEventEmitter, NativeModules, TouchableWithoutFeedback } from 'react-native'
+import { Button, Input } from 'react-native-elements'
 import BleManager from 'react-native-ble-manager'
 import { useNavigation } from '@react-navigation/native'
 import { i18nt } from '../../utils/i18n'
@@ -14,13 +8,16 @@ import { useDispatch, useSelector } from 'react-redux'
 import { debounce, isEmpty } from 'lodash-es'
 
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
+
 import {
     SInfoDetailView,
     SInfoView,
     SText_ConnectState,
-    SText_label,
-    SView_buttonGroup,
+    SText_Label,
+    SView_ButtonGroup,
     SView_ConnectStateWrap,
+    SView_ContractState,
+    SView_ContractStateWrap,
 } from '../tabs/BluetoothStyle'
 import Constants from 'expo-constants'
 import { SCREEN } from '../../navigation/constants'
@@ -43,6 +40,24 @@ const Bluetooth = ({}) => {
     const dispatch = useDispatch()
     const navigation = useNavigation()
     const qrValue = useSelector((state) => state.qr)
+    const [fastenedTypes, setFastenedTypes] = useState({
+        icon: 'account-hard-hat',
+        color: '#ccc',
+        borderColor: '#ccc',
+        backgroundColor: 'rgba(204,204,204, 0.2)'
+    })
+
+    const typeOfFastened = (value) => {
+        if (isEmpty(value)) {
+            setFastenedTypes({...fastenedTypes})
+        } else if(value === '11') {
+            setFastenedTypes({icon: 'check-circle-outline', color: 'rgb(42 ,200, 63)', borderColor: 'rgba(42 ,200, 63, 0.2)', backgroundColor: 'rgba(42 ,200, 63, 0.1)'})
+        } else if(value === '10') {
+            setFastenedTypes({icon: 'alert-outline', color: 'rgba(245, 161, 77)', borderColor: 'rgba(245, 161, 77, 0.2)', backgroundColor: 'rgba(245, 161, 77, 0.1)'})
+        } else if(value === '01' || value === '00') {
+            setFastenedTypes({icon: 'block-helper', color: 'rgb(245, 95, 77)', borderColor: 'rgba(245, 95, 77, 0.2)', backgroundColor: 'rgba(245, 95, 77, 0.1)'})
+        }
+    }
 
     const warnAlert = (message, e) => {
         console.error('[ERROR]', e)
@@ -192,6 +207,7 @@ const Bluetooth = ({}) => {
                                 param,
                             })
                                 .then((r) => {
+                                    typeOfFastened(value)
                                     console.log('service Success', r)
                                 })
                                 .catch((e) => {
@@ -258,7 +274,7 @@ const Bluetooth = ({}) => {
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <SInfoView>
                     <SInfoDetailView>
-                        <SText_label>{i18nt('common.name')}</SText_label>
+                        <SText_Label>{i18nt('common.name')}</SText_Label>
                         <Input
                             disabledInputStyle={{ background: '#ddd' }}
                             containerStyle={{
@@ -283,9 +299,9 @@ const Bluetooth = ({}) => {
                         />
                     </SInfoDetailView>
                     <SInfoDetailView>
-                        <SText_label>
+                        <SText_Label>
                             {i18nt('common.date-of-birth')}
-                        </SText_label>
+                        </SText_Label>
                         <Input
                             disabledInputStyle={{ background: '#ddd' }}
                             containerStyle={{
@@ -322,9 +338,9 @@ const Bluetooth = ({}) => {
                         />
                     </SInfoDetailView>
                     <SInfoDetailView>
-                        <SText_label>
+                        <SText_Label>
                             {i18nt('common.connection-status')}
-                        </SText_label>
+                        </SText_Label>
                         <SView_ConnectStateWrap
                             connectionState={connectionState}
                         >
@@ -336,20 +352,18 @@ const Bluetooth = ({}) => {
                         </SView_ConnectStateWrap>
                     </SInfoDetailView>
                     <SInfoDetailView>
-                        <SText_label>{i18nt('common.fail-safe')}</SText_label>
-                        <Text
-                            style={{
-                                textAlign: 'center',
-                                fontSize: fontSizeSet.lg,
-                            }}
-                        >
-                            {fastenedMessage(fastened)}
-                        </Text>
+                        <SText_Label>{i18nt('common.fail-safe')}</SText_Label>
+                        <SView_ContractStateWrap borderColor={fastenedTypes.borderColor} backgroundColor={fastenedTypes.backgroundColor}>
+                            <Icon name={fastenedTypes.icon} size={36} color={fastenedTypes.color}/>
+                            <SView_ContractState>
+                                {fastenedMessage(fastened)}
+                            </SView_ContractState>
+                        </SView_ContractStateWrap>
                     </SInfoDetailView>
                 </SInfoView>
             </TouchableWithoutFeedback>
 
-            <SView_buttonGroup>
+            <SView_ButtonGroup>
                 <Button
                     buttonStyle={{
                         height: 50,
@@ -375,7 +389,7 @@ const Bluetooth = ({}) => {
                     title={i18nt('action.disconnect')}
                     disabled={!connectionState}
                 />
-            </SView_buttonGroup>
+            </SView_ButtonGroup>
         </>
     )
 }
