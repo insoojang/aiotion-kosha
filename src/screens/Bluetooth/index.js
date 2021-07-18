@@ -1,10 +1,12 @@
-import React, { useCallback, useEffect, useState, useRef } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
     Alert,
     NativeEventEmitter,
     NativeModules,
     Keyboard,
     TouchableWithoutFeedback,
+    Platform,
+    PermissionsAndroid,
 } from 'react-native'
 import { Button, Input, Text } from 'react-native-elements'
 import BleManager from 'react-native-ble-manager'
@@ -157,51 +159,47 @@ const Bluetooth = ({}) => {
     const onConnectAndPrepare = async (peripheral) => {
         if (!isEmpty(peripheral)) {
             if (!connectionState) {
-                try {
-                    await BleManager.connect(peripheral)
-                    await BleManager.retrieveServices(peripheral)
-                    await BleManager.startNotification(
-                        peripheral,
-                        '0xFFF0',
-                        '0xFFF2',
-                    )
-                    setFastened('01')
-                    bleManagerEmitter.addListener(
-                        'BleManagerDidUpdateValueForCharacteristic',
-                        ({ value }) => {
-                            // Convert bytes array to string
-                            const { resourceId, server } = qrValue
-                            //fastenedState :
-                            // 11 : normal connection
-                            // 10 : Abnormal connection
-                            // 01 : disConnected
-                            // 00 : disConnected
-                            const fastenedState = !isEmpty(value)
-                                ? String.fromCharCode(...value)
-                                : '-'
-                            setFastened(fastenedState)
-                            const param = {
-                                empName: name,
-                                empBirth: date,
-                                connected: true,
-                                fastened: fastenedState,
-                            }
-                            saveBluetooteData({
-                                url: server,
-                                resourceId,
-                                param,
+                await BleManager.connect(peripheral)
+                await BleManager.retrieveServices(peripheral)
+                await BleManager.startNotification(
+                    peripheral,
+                    '0xFFF0',
+                    '0xFFF2',
+                )
+                setFastened('01')
+                bleManagerEmitter.addListener(
+                    'BleManagerDidUpdateValueForCharacteristic',
+                    ({ value }) => {
+                        // Convert bytes array to string
+                        const { resourceId, server } = qrValue
+                        //fastenedState :
+                        // 11 : normal connection
+                        // 10 : Abnormal connection
+                        // 01 : disConnected
+                        // 00 : disConnected
+                        const fastenedState = !isEmpty(value)
+                            ? String.fromCharCode(...value)
+                            : '-'
+                        setFastened(fastenedState)
+                        const param = {
+                            empName: name,
+                            empBirth: date,
+                            connected: true,
+                            fastened: fastenedState,
+                        }
+                        saveBluetooteData({
+                            url: server,
+                            resourceId,
+                            param,
+                        })
+                            .then((r) => {
+                                console.log('service Success', r)
                             })
-                                .then((r) => {
-                                    console.log('service Success', r)
-                                })
-                                .catch((e) => {
-                                    onDisconnect(qrValue, i18nt('error.server'))
-                                })
-                        },
-                    )
-                } catch (e) {
-                    onDisconnect(qrValue, i18nt('action.connection-fail'))
-                }
+                            .catch((e) => {
+                                onDisconnect(qrValue, i18nt('error.server'))
+                            })
+                    },
+                )
             } else {
                 onDisconnect(qrValue)
             }
@@ -220,6 +218,8 @@ const Bluetooth = ({}) => {
                     }
                 })
                 .catch((e) => {
+                    onDisconnect(qrValue, i18nt('action.connection-fail'))
+
                     warnAlert(null, e)
                 })
         }
@@ -235,6 +235,25 @@ const Bluetooth = ({}) => {
         //         setConnectionState(true)
         //     }
         // })
+        if (Platform.OS === 'android' && Platform.Version >= 23) {
+            PermissionsAndroid.check(
+                PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+            ).then((result) => {
+                if (result) {
+                    console.log('Permission is OK')
+                } else {
+                    PermissionsAndroid.request(
+                        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+                    ).then((result) => {
+                        if (result) {
+                            console.log('User accept')
+                        } else {
+                            console.log('User refuse')
+                        }
+                    })
+                }
+            })
+        }
         return () => {
             setConnectionState(false)
             onDisconnect(qrValue)
@@ -319,6 +338,7 @@ const Bluetooth = ({}) => {
                             disabled={connectionState}
                             keyboardType="numeric"
                             maxLength={7}
+                            returnKeyType="go"
                         />
                     </SInfoDetailView>
                     <SInfoDetailView>
