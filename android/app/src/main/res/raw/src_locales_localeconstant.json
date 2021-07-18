@@ -1,0 +1,54 @@
+{
+    "NSMicrophoneUsageDescription": "Need microphone access for using videos.",
+    "NSCameraUsageDescription": "It is necessary for the user to recognize the QR code with the camera and provide the app's server information.",
+    "NSBluetoothPeripheralUsageDescription": "User need permission to use and browse peripherals to communicate with the sensor.",
+    "NSBluetoothAlwaysUsageDescription": "User need permission to use Bluetooth to communicate with the sensor.",
+    "action": {
+        "cancel": "Cancel",
+        "ok": "OK",
+        "disconnect": "Disconnect",
+        "connection": "Connection",
+        "sensor-select": "Do you want to connect to that sensor?",
+        "connection-success" : "Connection success",
+        "disconnect-success" : "Disconnected",
+        "connection-fail" : "Connection failed"
+    },
+    "common": {
+        "all": "All",
+        "name": "name",
+        "date-of-birth" : "Date of birth",
+        "connection-status": "Connection Status",
+        "fail-safe": "Fail Safe",
+        "enter-name": "Please enter name"
+
+    },
+    "sensor": {
+        "on": "connect",
+        "off": "disconnect",
+        "normal-connection": "Normal Connection",
+        "abnormal-connection": "[Warning]: Abnormal connection",
+        "disConnected": "DisConnected"
+    },
+    "qr": {
+        "subscription": "If you fit the QR code and barcode within the guide line, it will be automatically recognized.",
+        "qr-submit": "Scan with QR",
+        "qr-code": "QR Code",
+        "request-save-server": "Change to the server of your choice?",
+        "request-move-server": "Go to the server selection screen?",
+        "success-select-server": "Server has been selected.",
+        "fail-change-server": "Server change failed.",
+        "same-change-server": "It is the same server as the current server.",
+        "image-recognize": "Recognizing as an image"
+    },
+    "error": {
+        "permission-deny-camera": "Camera access is denied and cannot be used.",
+        "invalid-qr": "Invalid QR Code",
+        "server" : "Internal Server Error",
+        "name-date" : "Please enter your name and date of birth.",
+        "device": "can not be ues if running in a simulator or emulator."
+    },
+    "title": {
+        "qr": "QR Code Scan",
+        "main": "Fall arrest safety system"
+    }
+}

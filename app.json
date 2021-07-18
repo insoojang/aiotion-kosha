@@ -17,6 +17,11 @@
     "locales": {
       "ko": "./src/locales/locale.constant-ko.json",
       "en": "./src/locales/locale.constant.json"
+    },
+    "splash": {
+      "image": "./assets/splash-bluetooth.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#024975"
     }
   }
 }
