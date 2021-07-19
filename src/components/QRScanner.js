@@ -64,10 +64,14 @@ const QrScanner = () => {
         if (!isEmpty(data)) {
             try {
                 let parsingData = JSON.parse(data)
-                if (qrErrorCheck(parsingData)) {
+                let newParsingData =
+                    typeof parsingData === 'object'
+                        ? parsingData
+                        : JSON.parse(parsingData)
+                if (qrErrorCheck(newParsingData)) {
                     throw new Error('QR Code not recognized.')
                 }
-                onConfirmSensor(parsingData)
+                onConfirmSensor(newParsingData)
             } catch (e) {
                 Alert.alert(i18nt('error.qr-recognize'), '', [
                     {
