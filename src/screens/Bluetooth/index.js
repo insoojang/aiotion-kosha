@@ -55,11 +55,13 @@ const Bluetooth = () => {
     const navigation = useNavigation()
     const qrValue = useSelector((state) => state.qr)
     const qrValueRef = useRef()
+    const timerRef = useRef(null)
 
     const onClear = () => {
         setLoading(false)
         setFastened(null)
         setConnectionState(false)
+        clearBluetoothDataTimer()
     }
     const warnAlert = (message, e) => {
         console.error('[ERROR] : warnAlert', e)
@@ -176,6 +178,28 @@ const Bluetooth = () => {
             warnAlert(i18nt('error.permission-deny-camera'), 'Camera Auth')
         }
     }
+    const fetchBluetoothData = ({ server, resourceId, param }) => {
+        saveBluetooteData({
+            url: server,
+            resourceId,
+            param,
+        })
+            .then((r) => {
+                console.log('service Success', r)
+            })
+            .catch((e) => {
+                console.error(e)
+                onDisconnect(i18nt('error.server'))
+                onClear()
+            })
+    }
+
+    const clearBluetoothDataTimer = () => {
+        if (timerRef?.current) {
+            clearInterval(timerRef.current)
+            timerRef.current = null
+        }
+    }
 
     const onConnectAndPrepare = async (peripheral) => {
         if (isEmpty(peripheral) || connectionState) {
@@ -220,19 +244,11 @@ const Bluetooth = () => {
                         connected: true,
                         fastened: fastenedState,
                     }
-                    saveBluetooteData({
-                        url: server,
-                        resourceId,
-                        param,
-                    })
-                        .then((r) => {
-                            console.log('service Success', r)
-                        })
-                        .catch((e) => {
-                            console.error(e)
-                            onDisconnect(i18nt('error.server'))
-                            onClear()
-                        })
+                    fetchBluetoothData({ server, resourceId, param })
+                    clearBluetoothDataTimer()
+                    timerRef.current = setInterval(() => {
+                        fetchBluetoothData({ server, resourceId, param })
+                    }, 1000 * 60)
                 },
             )
         } catch (e) {
@@ -460,19 +476,6 @@ const Bluetooth = () => {
                     }}
                     title={i18nt('action.disconnect')}
                     disabled={!connectionState}
-                />
-                <Button
-                    type="outline"
-                    buttonStyle={{
-                        height: 50,
-                        fontSize: fontSizeSet.base,
-                        borderColor: colorSet.primary,
-                    }}
-                    titleStyle={{ color: colorSet.primary }}
-                    onPress={() => {
-                        BleManager.checkState()
-                    }}
-                    title={'check'}
                 />
             </SView_ButtonGroup>
         </>
