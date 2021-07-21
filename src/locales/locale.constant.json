@@ -11,7 +11,8 @@
         "sensor-select": "Do you want to connect to that sensor?",
         "connection-success" : "Connection success",
         "disconnect-success" : "Disconnected",
-        "connection-fail" : "Connection failed"
+        "connection-fail" : "Connection failed",
+        "bluetooth-off" : "please turn on bluetooth"
     },
     "common": {
         "all": "All",
@@ -27,7 +28,8 @@
         "off": "disconnect",
         "normal-connection": "Normal Connection",
         "abnormal-connection": "[Warning]: Abnormal connection",
-        "disConnected": "DisConnected"
+        "disConnected": "DisConnected",
+        "unknown" : "unknown"
     },
     "qr": {
         "subscription": "If you fit the QR code and barcode within the guide line, it will be automatically recognized.",

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState, useRef } from 'react'
 import {
     Alert,
     NativeEventEmitter,
@@ -30,7 +30,11 @@ import {
 } from '../tabs/BluetoothStyle'
 import { SCREEN } from '../../navigation/constants'
 import { clearUuid } from '../../redux/reducers'
-import { fastenedMessage, qrErrorCheck } from '../../utils/common'
+import {
+    fastenedMessage,
+    qrErrorCheck,
+    typeOfFastened,
+} from '../../utils/common'
 import { saveBluetooteData } from '../../service/api/bluetooth.service'
 import { fontSizeSet } from '../../styles/size'
 import { colorSet } from '../../styles/colors'
@@ -45,56 +49,20 @@ const Bluetooth = () => {
     const [name, setName] = useState('')
     const [date, setDate] = useState('')
     const [errorMessage, setErrorMessage] = useState('')
-    const [fastenedTypes, setFastenedTypes] = useState({
-        icon: 'account-hard-hat',
-        color: '#ccc',
-        borderColor: '#ccc',
-        backgroundColor: 'rgba(204,204,204, 0.2)',
-    })
     const [loading, setLoading] = useState(false)
+    const [bluetoothState, setBluetoothState] = useState(null)
     const dispatch = useDispatch()
     const navigation = useNavigation()
     const qrValue = useSelector((state) => state.qr)
+    const qrValueRef = useRef()
 
-    const typeOfFastened = (value) => {
-        if (isEmpty(value)) {
-            setFastenedTypes({
-                icon: 'account-hard-hat',
-                color: '#ccc',
-                borderColor: '#ccc',
-                backgroundColor: 'rgba(204,204,204, 0.2)',
-            })
-        } else if (value === '11') {
-            setFastenedTypes({
-                icon: 'check-circle-outline',
-                color: 'rgb(42 ,200, 63)',
-                borderColor: 'rgba(42 ,200, 63, 0.2)',
-                backgroundColor: 'rgba(42 ,200, 63, 0.1)',
-            })
-        } else if (value === '10') {
-            setFastenedTypes({
-                icon: 'alert-outline',
-                color: 'rgba(245, 161, 77)',
-                borderColor: 'rgba(245, 161, 77, 0.2)',
-                backgroundColor: 'rgba(245, 161, 77, 0.1)',
-            })
-        } else if (value === '01' || value === '00') {
-            setFastenedTypes({
-                icon: 'block-helper',
-                color: 'rgb(245, 95, 77)',
-                borderColor: 'rgba(245, 95, 77, 0.2)',
-                backgroundColor: 'rgba(245, 95, 77, 0.1)',
-            })
-        }
-    }
     const onClear = () => {
         setLoading(false)
-        typeOfFastened(null)
         setFastened(null)
         setConnectionState(false)
     }
     const warnAlert = (message, e) => {
-        console.error('[ERROR]', e)
+        console.error('[ERROR] : warnAlert', e)
         return Alert.alert(
             !isEmpty(message) ? message : i18nt('action.connection-fail'),
             '',
@@ -129,16 +97,20 @@ const Bluetooth = () => {
                     console.log('Success Camera Permission.')
                 })
                 .catch((e) => {
-                    console.error('[ERROR]', e)
+                    console.error('[ERROR] : getCameraPermission', e)
                 })
         } catch (e) {
-            console.error('[ERROR]', e)
+            console.error('[ERROR] : onConnect', e)
         }
     }, 200)
+
     const onDisconnect = useCallback(
-        debounce((peripheral, message) => {
-            const { ios, android } = peripheral
-            if (peripheral?.ios && peripheral?.android) {
+        debounce((message) => {
+            if (isEmpty(qrValueRef) || isEmpty(qrValueRef.current)) {
+                return
+            }
+            const { ios, android } = qrValueRef?.current
+            if (android && ios) {
                 BleManager.disconnect(Platform.OS === 'android' ? android : ios)
                     .then(() => {
                         Alert.alert(
@@ -158,18 +130,13 @@ const Bluetooth = () => {
                                 text: i18nt('action.ok'),
                             },
                         ])
-                        console.error('[Error]', e)
+                        console.error('[Error] : BleManager.disconnect', e)
                     })
-            } else {
-                Alert.alert(i18nt('action.connection-fail'), '', [
-                    {
-                        text: i18nt('action.ok'),
-                    },
-                ])
             }
         }, 200),
         [],
     )
+
     const onChangeName = useCallback(
         debounce((name) => {
             setName(name)
@@ -212,10 +179,10 @@ const Bluetooth = () => {
 
     const onConnectAndPrepare = async (peripheral) => {
         if (isEmpty(peripheral) || connectionState) {
-            warnAlert()
+            setLoading(false)
+            // warnAlert()
             return
         }
-
         try {
             await BleManager.connect(peripheral)
             await BleManager.retrieveServices(peripheral).then(async () => {
@@ -230,6 +197,7 @@ const Bluetooth = () => {
                 )
             })
             setFastened('01')
+            qrValueRef.current = qrValue
             setConnectionState(true)
             successAlert()
             bleManagerEmitter.addListener(
@@ -258,30 +226,31 @@ const Bluetooth = () => {
                         param,
                     })
                         .then((r) => {
-                            typeOfFastened(fastenedState)
                             console.log('service Success', r)
                         })
                         .catch((e) => {
                             console.error(e)
+                            onDisconnect(i18nt('error.server'))
                             onClear()
-                            onDisconnect(qrValue, i18nt('error.server'))
                         })
                 },
             )
         } catch (e) {
             console.error(e)
-            onClear()
-            onDisconnect(qrValue, i18nt('action.connection-fail'))
+            setLoading(false)
+
+            // onDisconnect(qrValue, i18nt('action.connection-fail'))
+            // onClear()
         }
     }
 
-    const onDisconnectService = (value) => {
-        bleManagerEmitter.addListener('BleManagerDisconnectPeripheral', () => {
-            onClear()
-            const { resourceId, server } = value
+    const onDisconnectService = () => {
+        onClear()
+        const { resourceId, server } = qrValueRef?.current
+        if (resourceId && !isEmpty(server)) {
             const param = {
-                empName: name,
-                empBirth: date,
+                empName: '-',
+                empBirth: '-',
                 connected: false,
                 fastened: '00',
             }
@@ -296,8 +265,18 @@ const Bluetooth = () => {
                 .catch((e) => {
                     warnAlert(i18nt('action.connection-fail'), e)
                 })
-        })
+        }
     }
+    useEffect(() => {
+        if (bluetoothState === 'off') {
+            Alert.alert(i18nt('action.bluetooth-off'))
+        }
+        bleManagerEmitter.addListener('BleManagerDidUpdateState', (args) => {
+            setBluetoothState(args.state)
+            // The new state: args.state
+        })
+    }, [bluetoothState])
+
     useEffect(() => {
         if (!qrErrorCheck(qrValue)) {
             const { ios, android } = qrValue
@@ -308,16 +287,19 @@ const Bluetooth = () => {
                 })
                 .catch((e) => {
                     console.error(e)
+                    onDisconnect(i18nt('action.connection-fail'))
                     onClear()
-                    onDisconnect(qrValue, i18nt('action.connection-fail'))
-                    // warnAlert(null, e)
                 })
-            onDisconnectService(qrValue)
         }
     }, [qrValue])
 
     useEffect(() => {
         BleManager.start({ showAlert: false })
+        BleManager.checkState()
+        bleManagerEmitter.addListener('BleManagerDisconnectPeripheral', () => {
+            onDisconnectService()
+        })
+
         if (Platform.OS === 'android' && Platform.Version >= 23) {
             PermissionsAndroid.check(
                 PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
@@ -338,12 +320,12 @@ const Bluetooth = () => {
             })
         }
         return () => {
+            onDisconnect()
             onClear()
-            onDisconnect(qrValue)
             bleManagerEmitter.removeListener(
                 'BleManagerDisconnectPeripheral',
                 () => {
-                    setConnectionState(false)
+                    onDisconnectService()
                 },
             )
         }
@@ -352,7 +334,6 @@ const Bluetooth = () => {
     return (
         <>
             <Spinner visible={loading} />
-
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <SInfoView>
                     <SInfoDetailView>
@@ -435,13 +416,15 @@ const Bluetooth = () => {
                     <SInfoDetailView>
                         <SText_Label>{i18nt('common.fail-safe')}</SText_Label>
                         <SView_ContractStateWrap
-                            borderColor={fastenedTypes.borderColor}
-                            backgroundColor={fastenedTypes.backgroundColor}
+                            borderColor={typeOfFastened(fastened).borderColor}
+                            backgroundColor={
+                                typeOfFastened(fastened).backgroundColor
+                            }
                         >
                             <Icon
-                                name={fastenedTypes.icon}
+                                name={typeOfFastened(fastened).icon}
                                 size={36}
-                                color={fastenedTypes.color}
+                                color={typeOfFastened(fastened).color}
                             />
                             <SView_ContractState>
                                 {fastenedMessage(fastened)}
@@ -472,11 +455,24 @@ const Bluetooth = () => {
                     }}
                     titleStyle={{ color: colorSet.primary }}
                     onPress={() => {
+                        onDisconnect()
                         onClear()
-                        onDisconnect(qrValue)
                     }}
                     title={i18nt('action.disconnect')}
                     disabled={!connectionState}
+                />
+                <Button
+                    type="outline"
+                    buttonStyle={{
+                        height: 50,
+                        fontSize: fontSizeSet.base,
+                        borderColor: colorSet.primary,
+                    }}
+                    titleStyle={{ color: colorSet.primary }}
+                    onPress={() => {
+                        BleManager.checkState()
+                    }}
+                    title={'check'}
                 />
             </SView_ButtonGroup>
         </>

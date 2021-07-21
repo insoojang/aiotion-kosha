@@ -11,7 +11,8 @@
         "sensor-select": "해당 센서로 연결 하시겠습니까?",
         "connection-success" : "연결 성공",
         "disconnect-success" : "연결 해제됨",
-        "connection-fail" : "연결 실패"
+        "connection-fail" : "연결 실패",
+        "bluetooth-off" : "블루투스를 켜주세요."
     },
     "common": {
         "all": "전체",
@@ -26,12 +27,8 @@
         "off": "연결 안됨",
         "normal-connection": "안전 체결",
         "abnormal-connection": "[경고]:역방향 체결",
-        "disConnected": "체결 안됨"
-    },
-    "rope": {
-        "on": "체결됨",
-        "off": "체결 안됨",
-        "unsafe": "[경고]:불안전 체결"
+        "disconnected": "체결 안됨",
+        "unknown" : "알수없음"
     },
     "qr": {
         "subscription": "안내선 안에 QR 코드 및 바코드를 맞추면 자동으로 인식됩니다.",
