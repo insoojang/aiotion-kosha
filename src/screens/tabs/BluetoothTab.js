@@ -10,9 +10,15 @@ const BluetoothTab = () => {
         <S_BluetoothView>
             <ScrollView
                 showsVerticalScrollIndicator={false}
-                style={{ width: '100%', backgroundColor: colorSet.white }}
+                style={{
+                    width: '100%',
+                    backgroundColor: colorSet.white,
+                }}
             >
-                <TouchableOpacity activeOpacity={1} style={{ height: responsiveHeight(100) - 91 }}>
+                <TouchableOpacity
+                    activeOpacity={1}
+                    style={{ height: responsiveHeight(100) - 91 }}
+                >
                     <Bluetooth />
                 </TouchableOpacity>
             </ScrollView>
