@@ -7,6 +7,7 @@ import {
     TouchableWithoutFeedback,
     Platform,
     PermissionsAndroid,
+    AppState,
 } from 'react-native'
 import { Button, Input } from 'react-native-elements'
 import BleManager from 'react-native-ble-manager'
@@ -39,6 +40,12 @@ import { saveBluetooteData } from '../../service/api/bluetooth.service'
 import { fontSizeSet } from '../../styles/size'
 import { colorSet } from '../../styles/colors'
 import Spinner from 'react-native-loading-spinner-overlay'
+import useAppState from '../../utils/useAppState'
+import * as TaskManager from 'expo-task-manager'
+import { registerTaskAsync, unregisterTaskAsync } from 'expo-background-fetch'
+import { BackgroundFetchResult } from 'expo-background-fetch/build/BackgroundFetch.types'
+const BACKGROUND_FETCH_TASK = 'background-fetch'
+const LAST_FETCH_DATE_KEY = 'background-fetch-date'
 
 const BleManagerModule = NativeModules.BleManager
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule)
@@ -56,6 +63,7 @@ const Bluetooth = () => {
     const qrValue = useSelector((state) => state.qr)
     const qrValueRef = useRef()
     const timerRef = useRef(null)
+    const appState = useAppState(null)
 
     const onClear = () => {
         setLoading(false)
@@ -63,6 +71,7 @@ const Bluetooth = () => {
         setConnectionState(false)
         clearBluetoothDataTimer()
     }
+
     const warnAlert = (message, e) => {
         console.error('[ERROR] : warnAlert', e)
         return Alert.alert(
@@ -315,6 +324,10 @@ const Bluetooth = () => {
         bleManagerEmitter.addListener('BleManagerDisconnectPeripheral', () => {
             onDisconnectService()
         })
+        AppState.addEventListener('change', (state) => {
+            console.log('Change State----', state)
+            console.log('AppState.currentState----', AppState.currentState)
+        })
 
         if (Platform.OS === 'android' && Platform.Version >= 23) {
             PermissionsAndroid.check(
@@ -347,6 +360,44 @@ const Bluetooth = () => {
         }
     }, [])
 
+    // const checkStatusAsync = async () => {
+    //     const status = await getStatusAsync()
+    //     const isRegistered = await TaskManager.isTaskRegisteredAsync(
+    //         BACKGROUND_FETCH_TASK,
+    //     )
+    // }
+    //
+    // TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
+    //     const now = Date.now()
+    //
+    //     console.log(
+    //         `Got background fetch call at date: ${new Date(now).toISOString()}`,
+    //     )
+    //
+    //     return BackgroundFetchResult.NewData
+    // })
+    //
+    // useEffect(() => {
+    //     if (appState === 'active') {
+    //         console.log('active--------------', appState)
+    //         TaskManager.isTaskRegisteredAsync(BACKGROUND_FETCH_TASK).then(
+    //             async (isRegistered) => {
+    //                 if (isRegistered) {
+    //                     await unregisterTaskAsync(BACKGROUND_FETCH_TASK)
+    //                 } else {
+    //                     console.log('@@@@@@@@@@@@@@@@@@@@@@@@@')
+    //                     await registerTaskAsync(BACKGROUND_FETCH_TASK, {
+    //                         minimumInterval: 60, // 1 minute
+    //                         stopOnTerminate: false,
+    //                         startOnBoot: true,
+    //                     })
+    //                 }
+    //                 console.log('isRegistered-----------------', isRegistered)
+    //             },
+    //         )
+    //         // refreshLastFetchDateAsync()
+    //     }
+    // }, [appState])
     return (
         <>
             <Spinner visible={loading} />

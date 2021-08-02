@@ -11,7 +11,13 @@
       "buildNumber": "1.1.0",
       "supportsTablet": true,
       "infoPlist": {
-        "CFBundleAllowMixedLocalizations": true
+        "CFBundleAllowMixedLocalizations": true,
+        "UIBackgroundModes": [
+          "fetch",
+          "bluetooth-central",
+          "bluetooth-peripheral",
+          "processing"
+        ]
       }
     },
     "locales": {
