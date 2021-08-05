@@ -8,18 +8,16 @@ export const qrErrorCheck = (value) => {
     switch (true) {
         case isEmpty(value):
             return true
-        case Object.keys(value).length !== 4:
+        case Object.keys(value).length < 3:
             return true
         case !value.hasOwnProperty('ios'):
             return true
         case !value.hasOwnProperty('android'):
             return true
-        case !value.hasOwnProperty('resourceId'):
-            return true
         case !value.hasOwnProperty('server'):
             return true
-        case isEmpty(value.uuid) &&
-            isEmpty(value.resourceId) &&
+        case isEmpty(value.ios) &&
+            isEmpty(value.android) &&
             isEmpty(value.server):
             return true
         default:
@@ -71,7 +69,7 @@ export const typeOfFastened = (value) => {
         case value === '10':
             return {
                 icon: 'alert-outline',
-                color: 'rgba(245, 161, 77)',
+                color: 'rgb(245, 161, 77)',
                 borderColor: 'rgba(245, 161, 77, 0.2)',
                 backgroundColor: 'rgba(245, 161, 77, 0.1)',
             }

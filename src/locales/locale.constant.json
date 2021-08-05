@@ -51,6 +51,7 @@
     },
     "title": {
         "qr": "QR Code Scan",
-        "main": "Fall arrest safety system"
+        "main": "Hanging-scaffolding safety system",
+        "description" :"Communication with Hanging-scaffolding sensor..."
     }
 }
