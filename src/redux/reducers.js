@@ -3,10 +3,9 @@ import { createSlice } from '@reduxjs/toolkit'
 const QR_STATE = {
     android: '',
     ios: '',
-    resourceId: '',
     server: '',
 }
-// "uuid":"E7465DFB-8E9A-D2BA-65F5-68365089F423","resourceId":"4100","server":"http://192.168.234.24"
+// “{\“resourceId\“:4222,\“server\“:\“http://192.168.234.24\“,\“ios\“:\“E7465DFB-8E9A-D2BA-65F5-68365089F423\“,\“android\“:\“A4:34:F1:36:F7:3E\“}”
 export const qrSlice = createSlice({
     name: 'uuid',
     initialState: QR_STATE,

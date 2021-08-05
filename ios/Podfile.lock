@@ -254,6 +254,10 @@ PODS:
     - React-cxxreact (= 0.63.4)
     - React-jsi (= 0.63.4)
   - React-jsinspector (0.63.4)
+  - react-native-background-actions (2.6.2):
+    - React-Core
+  - react-native-background-timer (2.4.1):
+    - React-Core
   - react-native-ble-manager (7.6.0):
     - React-Core
   - react-native-safe-area-context (3.2.0):
@@ -420,6 +424,8 @@ DEPENDENCIES:
   - React-jsi (from `../node_modules/react-native/ReactCommon/jsi`)
   - React-jsiexecutor (from `../node_modules/react-native/ReactCommon/jsiexecutor`)
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
+  - react-native-background-actions (from `../node_modules/react-native-background-actions`)
+  - react-native-background-timer (from `../node_modules/react-native-background-timer`)
   - react-native-ble-manager (from `../node_modules/react-native-ble-manager`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - React-RCTActionSheet (from `../node_modules/react-native/Libraries/ActionSheetIOS`)
@@ -524,6 +530,10 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/jsiexecutor"
   React-jsinspector:
     :path: "../node_modules/react-native/ReactCommon/jsinspector"
+  react-native-background-actions:
+    :path: "../node_modules/react-native-background-actions"
+  react-native-background-timer:
+    :path: "../node_modules/react-native-background-timer"
   react-native-ble-manager:
     :path: "../node_modules/react-native-ble-manager"
   react-native-safe-area-context:
@@ -622,6 +632,8 @@ SPEC CHECKSUMS:
   React-jsi: a0418934cf48f25b485631deb27c64dc40fb4c31
   React-jsiexecutor: 93bd528844ad21dc07aab1c67cb10abae6df6949
   React-jsinspector: 58aef7155bc9a9683f5b60b35eccea8722a4f53a
+  react-native-background-actions: 5acd5851ac2d3bb8b1c39fcc9332abe45977fd04
+  react-native-background-timer: 17ea5e06803401a379ebf1f20505b793ac44d0fe
   react-native-ble-manager: fe313716f5edd2f406ec2a48a2c2ef5a0daeb5f3
   react-native-safe-area-context: f0906bf8bc9835ac9a9d3f97e8bde2a997d8da79
   React-RCTActionSheet: 89a0ca9f4a06c1f93c26067af074ccdce0f40336
@@ -655,6 +667,6 @@ SPEC CHECKSUMS:
   Yoga: 4bd86afe9883422a7c4028c00e34790f560923d6
   ZXingObjC: fdbb269f25dd2032da343e06f10224d62f537bdb
 
-PODFILE CHECKSUM: 64ae975b9145303b786692ccd910dc75c72d4c9a
+PODFILE CHECKSUM: 77d54ca45708e9fbda356594b8af088d12f9a796
 
 COCOAPODS: 1.10.1

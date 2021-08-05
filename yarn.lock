@@ -6099,6 +6099,18 @@ react-is@^17.0.1:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-17.0.2.tgz#e691d4a8e9c789365655539ab372762b0efb54f0"
   integrity sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==
 
+react-native-background-actions@^2.6.2:
+  version "2.6.2"
+  resolved "https://registry.yarnpkg.com/react-native-background-actions/-/react-native-background-actions-2.6.2.tgz#dfab250cbeab23f0885dd8d643a2e1e9add49c74"
+  integrity sha512-VdIscD73k5VdnoKFANXYYST/uYs0PS+66eLfSdkxvB08CM7grbM7bn5qeqfySMD1B0HjXiErQJIU4It+Q0F+Hw==
+  dependencies:
+    eventemitter3 "^4.0.7"
+
+react-native-background-timer@^2.4.1:
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/react-native-background-timer/-/react-native-background-timer-2.4.1.tgz#a3bc1cafa8c1e3aeefd0611de120298b67978a0f"
+  integrity sha512-TE4Kiy7jUyv+hugxDxitzu38sW1NqjCk4uE5IgU2WevLv7sZacaBc6PZKOShNRPGirLl1NWkaG3LDEkdb9Um5g==
+
 react-native-ble-manager@^7.5.0:
   version "7.6.0"
   resolved "https://registry.yarnpkg.com/react-native-ble-manager/-/react-native-ble-manager-7.6.0.tgz#9874a96efe026f4241894e565b2f656ac18cdebe"
