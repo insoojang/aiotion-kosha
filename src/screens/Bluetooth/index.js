@@ -407,9 +407,9 @@ const Bluetooth = () => {
                     const { delay } = taskData
                     //  background task 무한유지 로직
                     for (let i = 0; BackgroundService.isRunning(); i++) {
-                        // console.log(
-                        //     `Count:${i}  시간:${new Date().toTimeString()}  체결여부:${fastened}  이름:${name}  생년월일:${date}  서버:${server}`,
-                        // )
+                        console.log(
+                            `Count:${i}  시간:${new Date().toTimeString()}  체결여부:${fastened}  이름:${name}  생년월일:${date}  서버:${server}`,
+                        )
                         fetchBluetoothData({
                             server,
                             resourceKey: android,
