@@ -3630,14 +3630,6 @@ expo-asset@~8.3.1:
     path-browserify "^1.0.0"
     url-parse "^1.4.4"
 
-expo-background-fetch@~9.2.2:
-  version "9.2.2"
-  resolved "https://registry.yarnpkg.com/expo-background-fetch/-/expo-background-fetch-9.2.2.tgz#59328981817e05e59f1a62e7d844c412728916ac"
-  integrity sha512-9DSHZkhun36mWzTrAx8GoTkkx5a06vmeaPQfQCo0DE1cNiMl3//HOFk04YdKmFcyTHJ+wIJFFGsNdjHiYH18+g==
-  dependencies:
-    "@expo/config-plugins" "^3.0.0"
-    expo-task-manager "~9.2.2"
-
 expo-barcode-scanner@~10.1.2:
   version "10.1.2"
   resolved "https://registry.yarnpkg.com/expo-barcode-scanner/-/expo-barcode-scanner-10.1.2.tgz#51e3d176124862273073bbf8fb542534cb2f1e27"
@@ -3735,15 +3727,6 @@ expo-structured-headers@~1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/expo-structured-headers/-/expo-structured-headers-1.0.1.tgz#2f3117fc9480e01aa6705493d3213060c2dcf683"
   integrity sha512-U4frE8rT5x1LqZv5Ru/9CtzY8gh0wp1MfwTu5hetPydnwxXfWchuXvKgWRjEHglFU2X/29kYFY/J1UkPvCN8xg==
-
-expo-task-manager@^9.2.2, expo-task-manager@~9.2.2:
-  version "9.2.2"
-  resolved "https://registry.yarnpkg.com/expo-task-manager/-/expo-task-manager-9.2.2.tgz#1c4419114ca254223d73cec4e23752c45cc9270d"
-  integrity sha512-GDObZYoCT1bwYXYtT9RinRhR7Y+mCy6DvO7OvRFW3hgxHVXvAM8YFA8jr3airY0XF73aT35/nFnOe+MFCELXFA==
-  dependencies:
-    "@expo/config-plugins" "^3.0.0"
-    expo-modules-core "~0.2.0"
-    unimodules-app-loader "~2.2.0"
 
 expo-updates@~0.5.4:
   version "0.5.5"
@@ -6106,11 +6089,6 @@ react-native-background-actions@^2.6.2:
   dependencies:
     eventemitter3 "^4.0.7"
 
-react-native-background-timer@^2.4.1:
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/react-native-background-timer/-/react-native-background-timer-2.4.1.tgz#a3bc1cafa8c1e3aeefd0611de120298b67978a0f"
-  integrity sha512-TE4Kiy7jUyv+hugxDxitzu38sW1NqjCk4uE5IgU2WevLv7sZacaBc6PZKOShNRPGirLl1NWkaG3LDEkdb9Um5g==
-
 react-native-ble-manager@^7.5.0:
   version "7.6.0"
   resolved "https://registry.yarnpkg.com/react-native-ble-manager/-/react-native-ble-manager-7.6.0.tgz#9874a96efe026f4241894e565b2f656ac18cdebe"
@@ -7274,11 +7252,6 @@ unimodules-app-loader@~2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/unimodules-app-loader/-/unimodules-app-loader-2.1.0.tgz#4cf9fa058997729ce284a713c7d04bba0952e4b7"
   integrity sha512-W+D+hVXq6jOvBm7QVwODPENz6Lupj73QequNNG+6GCTkqn4ybq/lba9IQvJQT2QzdL3luVHin+eym18cDblMlg==
-
-unimodules-app-loader@~2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/unimodules-app-loader/-/unimodules-app-loader-2.2.0.tgz#8f8543630ada0f9092ce95050d05738990d1f4ab"
-  integrity sha512-porQWVWu7meIrCJ+c+H7eJyeC2rHioLUZiv4UcOs33SAyUhR4X05tCC8NIOuQJsF08Fj3a0ck7HUsd5xq+LqKA==
 
 unimodules-barcode-scanner-interface@~6.1.0:
   version "6.1.0"
