@@ -46,7 +46,7 @@ import Spinner from 'react-native-loading-spinner-overlay'
 import useAppState from '../../utils/useAppState'
 import BackgroundService from 'react-native-background-actions'
 import { jsonParser, sensorDataParser } from '../../utils/parser'
-import { successAlert, warnAlert } from './aler-t'
+import { successAlert, warnAlert } from './alert'
 import { permissionsAndroid } from '../../utils/permissions'
 
 const BleManagerModule = NativeModules.BleManager
