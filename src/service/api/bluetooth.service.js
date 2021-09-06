@@ -7,5 +7,13 @@ const saveBluetooteData = ({ url, resourceKey, param }) => {
         param,
     )
 }
+const getFirmwareVersion = (url) => {
+    return client.get(`${url || defaultUrl}/api/noauth/kosha/files/recent`)
+}
+const getFirmwareFile = ({ url, version }) => {
+    return client.get(
+        `${url || defaultUrl}/api/noauth/kosha/file/${version}/download`,
+    )
+}
 
-export { saveBluetooteData }
+export { saveBluetooteData, getFirmwareVersion, getFirmwareFile }

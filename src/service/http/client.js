@@ -53,6 +53,9 @@ const client = {
     post(url, data, headers, responseType) {
         return requestInterceptor('POST', url, data, headers, responseType)
     },
+    get(url, data, headers, responseType) {
+        return requestInterceptor('GET', url, data, headers, responseType)
+    },
 }
 
 export default client
