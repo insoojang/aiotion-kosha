@@ -1,12 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit'
-import logger from 'redux-logger'
+// import logger from 'redux-logger'
 import qrSlice from './reducers'
 
 export default configureStore({
     reducer: {
         qr: qrSlice,
     },
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(logger),
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware(),
 })
 // export default configureStore({
 //     reducer: {

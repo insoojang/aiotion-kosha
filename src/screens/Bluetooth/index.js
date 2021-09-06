@@ -6,7 +6,6 @@ import {
     Keyboard,
     TouchableWithoutFeedback,
     Platform,
-    PermissionsAndroid,
 } from 'react-native'
 import { Button, Input } from 'react-native-elements'
 import BleManager from 'react-native-ble-manager'
@@ -14,7 +13,6 @@ import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from 'react-redux'
 import { debounce, isEmpty } from 'lodash-es'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
-import Constants from 'expo-constants'
 import { Camera } from 'expo-camera'
 
 import { i18nt } from '../../utils/i18n'
@@ -31,34 +29,28 @@ import {
 import { SCREEN } from '../../navigation/constants'
 import { clearUuid } from '../../redux/reducers'
 import {
+    checkDevice,
+    checkNotifyProperties,
     fastenedMessage,
+    isEmptyASCII,
     qrErrorCheck,
     typeOfFastened,
 } from '../../utils/common'
-import { saveBluetooteData } from '../../service/api/bluetooth.service'
+import {
+    getFirmwareVersion,
+    saveBluetooteData,
+} from '../../service/api/bluetooth.service'
 import { fontSizeSet } from '../../styles/size'
 import { colorSet } from '../../styles/colors'
 import Spinner from 'react-native-loading-spinner-overlay'
 import useAppState from '../../utils/useAppState'
 import BackgroundService from 'react-native-background-actions'
+import { jsonParser, sensorDataParser } from '../../utils/parser'
+import { successAlert, warnAlert } from './aler-t'
+import { permissionsAndroid } from '../../utils/permissions'
 
 const BleManagerModule = NativeModules.BleManager
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule)
-
-const options = {
-    taskName: i18nt('title.main'),
-    taskTitle: i18nt('title.main'),
-    taskDesc: i18nt('title.description'),
-    taskIcon: {
-        name: 'ic_launcher',
-        type: 'mipmap',
-    },
-    color: '#ff00ff',
-    // linkingURI: 'yourSchemeHere://chat/jane', // See Deep Linking for more info
-    parameters: {
-        delay: 1000 * 60,
-    },
-}
 
 const Bluetooth = () => {
     const [connectionState, setConnectionState] = useState(false)
@@ -68,47 +60,25 @@ const Bluetooth = () => {
     const [errorMessage, setErrorMessage] = useState('')
     const [loading, setLoading] = useState(false)
     const [bluetoothState, setBluetoothState] = useState(null)
+    const [firmwareVersion, setFirmwareVersion] = useState(0)
+
     const dispatch = useDispatch()
     const navigation = useNavigation()
     const qrValue = useSelector((state) => state.qr)
     const qrValueRef = useRef()
-    const timerRef = useRef(null)
     const appState = useAppState(null)
 
     const onClear = () => {
         setLoading(false)
         setFastened(null)
         setConnectionState(false)
-        clearBluetoothDataTimer()
         BackgroundService.stop()
-    }
-
-    const warnAlert = (message, e) => {
-        console.error('[ERROR] : warnAlert', e)
-        return Alert.alert(
-            !isEmpty(message) ? message : i18nt('action.connection-fail'),
-            '',
-            [
-                {
-                    text: i18nt('action.ok'),
-                    onPress: () => {
-                        setConnectionState(false)
-                    },
-                },
-            ],
+        bleManagerEmitter.removeAllListeners(
+            'BleManagerDidUpdateValueForCharacteristic',
         )
+        bleManagerEmitter.removeAllListeners('BleManagerDidUpdateState')
+        bleManagerEmitter.removeAllListeners('BleManagerDisconnectPeripheral')
     }
-
-    const successAlert = (message) =>
-        Alert.alert(
-            !isEmpty(message) ? message : i18nt('action.connection-success'),
-            '',
-            [
-                {
-                    text: i18nt('action.ok'),
-                },
-            ],
-        )
 
     const onConnect = debounce(() => {
         try {
@@ -173,14 +143,6 @@ const Bluetooth = () => {
         [],
     )
 
-    const checkDevice = () => {
-        if (!Constants.isDevice) {
-            const e = new Error(i18nt('error.device'))
-            e.name = 'device'
-            throw e
-        }
-    }
-
     const checkNameAndDate = () => {
         if (isEmpty(name) || isEmpty(date)) {
             setErrorMessage(i18nt('error.name-date'))
@@ -197,7 +159,11 @@ const Bluetooth = () => {
         if (status === 'granted') {
             navigation.navigate(SCREEN.QR)
         } else {
-            warnAlert(i18nt('error.permission-deny-camera'), 'Camera Auth')
+            warnAlert({
+                message: i18nt('error.permission-deny-camera'),
+                error: 'Camera Auth',
+                state: setConnectionState,
+            })
         }
     }
 
@@ -217,11 +183,21 @@ const Bluetooth = () => {
             })
     }
 
-    const clearBluetoothDataTimer = () => {
-        if (timerRef?.current) {
-            clearInterval(timerRef.current)
-            timerRef.current = null
-        }
+    const fetchVersionData = (server) => {
+        getFirmwareVersion(server)
+            .then((response) => {
+                if (response?.data?.version) {
+                    setFirmwareVersion(response.data.version)
+                } else {
+                    warnAlert({ message: i18nt('error.firmware-version') })
+                }
+            })
+            .catch((e) => {
+                warnAlert({
+                    message: i18nt('error.firmware-version'),
+                    error: e,
+                })
+            })
     }
 
     const onConnectAndPrepare = async (peripheral) => {
@@ -233,20 +209,29 @@ const Bluetooth = () => {
         try {
             BleManager.connect(peripheral)
                 .then((v) => {
-                    BleManager.retrieveServices(peripheral).then(() => {
-                        setTimeout(
-                            async () =>
-                                await BleManager.startNotification(
-                                    peripheral,
-                                    Platform.OS === 'android'
-                                        ? 'fff0'
-                                        : '0xFFF0',
-                                    Platform.OS === 'android'
-                                        ? 'fff2'
-                                        : '0xFFF2',
-                                ),
-                            3000,
-                        )
+                    BleManager.retrieveServices(peripheral).then((info) => {
+                        const {
+                            status,
+                            characteristic,
+                            service,
+                        } = checkNotifyProperties(info)
+                        if (status === 200) {
+                            setTimeout(
+                                async () =>
+                                    await BleManager.startNotification(
+                                        peripheral,
+                                        service,
+                                        characteristic,
+                                    ),
+                                3000,
+                            )
+                        } else {
+                            console.error(
+                                `[ERROR] : ${i18nt(
+                                    `error.sensor-error-${status}`,
+                                )}`,
+                            )
+                        }
                     })
                 })
                 .catch((e) => {
@@ -260,6 +245,11 @@ const Bluetooth = () => {
             bleManagerEmitter.addListener(
                 'BleManagerDidUpdateValueForCharacteristic',
                 ({ value }) => {
+                    const asciiCode = isEmptyASCII(value)
+
+                    const result = JSON.stringify(
+                        String.fromCharCode(...asciiCode),
+                    )
                     // Convert bytes array to string
                     const { server, android } = qrValue
                     //fastenedState :
@@ -267,8 +257,9 @@ const Bluetooth = () => {
                     // 10 : Abnormal connection
                     // 01 : disConnected
                     // 00 : disConnected
-                    const fastenedState = !isEmpty(value)
-                        ? String.fromCharCode(...value)
+                    const convertData = jsonParser(result)
+                    const fastenedState = !isEmpty(result)
+                        ? sensorDataParser(convertData)
                         : '-'
                     setFastened(fastenedState)
                     const param = {
@@ -276,16 +267,9 @@ const Bluetooth = () => {
                         empBirth: date,
                         connected: true,
                         fastened: fastenedState,
+                        battery: convertData?.battery,
                     }
                     fetchBluetoothData({ server, resourceKey: android, param })
-                    clearBluetoothDataTimer()
-                    timerRef.current = setInterval(() => {
-                        fetchBluetoothData({
-                            server,
-                            resourceKey: android,
-                            param,
-                        })
-                    }, 1000 * 60)
                 },
             )
         } catch (e) {
@@ -318,7 +302,11 @@ const Bluetooth = () => {
                     console.log('service Success')
                 })
                 .catch((e) => {
-                    warnAlert(i18nt('action.connection-fail'), e)
+                    warnAlert({
+                        message: i18nt('action.connection-fail'),
+                        error: e,
+                        state: setConnectionState,
+                    })
                 })
         }
     }
@@ -328,14 +316,19 @@ const Bluetooth = () => {
             Alert.alert(i18nt('action.bluetooth-off'))
         }
         bleManagerEmitter.addListener('BleManagerDidUpdateState', (args) => {
-            setBluetoothState(args.state)
+            if (args?.state !== bluetoothState) {
+                setBluetoothState(args.state)
+            }
         })
     }, [bluetoothState])
 
     useEffect(() => {
         if (!qrErrorCheck(qrValue)) {
-            const { ios, android } = qrValue
+            const { ios, android, server } = qrValue
             setLoading(true)
+            if (connectionState) {
+                fetchVersionData(server)
+            }
             onConnectAndPrepare(Platform.OS === 'android' ? android : ios)
                 .then(() => {
                     setLoading(false)
@@ -348,44 +341,21 @@ const Bluetooth = () => {
         }
     }, [qrValue])
 
+    //First Start Logic
     useEffect(() => {
         BleManager.start({ showAlert: false })
         BleManager.checkState()
         bleManagerEmitter.addListener('BleManagerDisconnectPeripheral', () => {
             onDisconnectService()
         })
-
-        if (Platform.OS === 'android' && Platform.Version >= 23) {
-            PermissionsAndroid.check(
-                PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-            ).then((result) => {
-                if (result) {
-                    console.log('Permission is OK')
-                } else {
-                    PermissionsAndroid.request(
-                        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-                    ).then((result) => {
-                        if (result) {
-                            console.log('User accept')
-                        } else {
-                            console.log('User refuse')
-                        }
-                    })
-                }
-            })
-        }
+        permissionsAndroid()
         return () => {
             onDisconnect()
             onClear()
-            bleManagerEmitter.removeListener(
-                'BleManagerDisconnectPeripheral',
-                () => {
-                    onDisconnectService()
-                },
-            )
         }
     }, [])
 
+    //Background mode
     React.useEffect(() => {
         if (!isEmpty(appState)) {
             if (
@@ -393,38 +363,36 @@ const Bluetooth = () => {
                 !isEmpty(fastened) &&
                 (fastened === '10' || fastened === '11')
             ) {
-                const sleep = (time) =>
-                    new Promise((resolve) => setTimeout(() => resolve(), time))
-                const { server, android } = qrValue
-                const param = {
-                    empName: name,
-                    empBirth: date,
-                    connected: true,
-                    fastened: fastened,
-                }
-
-                const backGroundTask = async (taskData) => {
-                    const { delay } = taskData
-                    //  background task 무한유지 로직
-                    for (let i = 0; BackgroundService.isRunning(); i++) {
-                        console.log(
-                            `Count:${i}  시간:${new Date().toTimeString()}  체결여부:${fastened}  이름:${name}  생년월일:${date}  서버:${server}`,
-                        )
-                        fetchBluetoothData({
-                            server,
-                            resourceKey: android,
-                            param,
-                        })
-                        await sleep(delay)
-                    }
-                }
-                BackgroundService.start(backGroundTask, options)
+                console.log('background', fastened)
+                // const sleep = (time) =>
+                //     new Promise((resolve) => setTimeout(() => resolve(), time))
+                // const { server, android } = qrValue
+                // const param = {
+                //     empName: name,
+                //     empBirth: date,
+                //     connected: true,
+                //     fastened: fastened,
+                //     battery: '125v',
+                // }
+                //
+                // const backGroundTask = async (taskData) => {
+                //     const { delay } = taskData
+                //     //  background task 무한유지 로직
+                //     for (let i = 0; BackgroundService.isRunning(); i++) {
+                //         fetchBluetoothData({
+                //             server,
+                //             resourceKey: android,
+                //             param,
+                //         })
+                //         await sleep(delay)
+                //     }
+                // }
+                // BackgroundService.start(backGroundTask, backgroundOptions)
             } else {
                 BackgroundService.stop()
             }
         }
     }, [appState])
-    // name: 'ic_launcher',
 
     return (
         <>
@@ -530,9 +498,6 @@ const Bluetooth = () => {
             </TouchableWithoutFeedback>
 
             <SView_ButtonGroup>
-                {/*<Text>*/}
-                {/*    test : {status ? BackgroundFetch.Status[status] : null}*/}
-                {/*</Text>*/}
                 <Button
                     buttonStyle={{
                         height: 50,

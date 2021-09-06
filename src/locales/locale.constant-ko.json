@@ -28,7 +28,8 @@
         "normal-connection": "안전 체결",
         "abnormal-connection": "[경고]:역방향 체결",
         "disconnected": "체결 안됨",
-        "unknown" : "알수없음"
+        "unknown" : "알수없음",
+        "foreign-object" : "[경고]:이물질"
     },
     "qr": {
         "subscription": "안내선 안에 QR 코드 및 바코드를 맞추면 자동으로 인식됩니다.",
@@ -46,7 +47,10 @@
         "qr-recognize": "QR 코드를 인식할 수 없습니다.",
         "server" : "서버로부터 응답할 수 없는 에러가 발생했습니다.",
         "name-date" : "이름과 생년월일을 입력하세요.",
-        "device": "시뮬레이터 또는 에뮬레이터에서 실행중인 경우 사용할 수 없습니다."
+        "device": "시뮬레이터 또는 에뮬레이터에서 실행중인 경우 사용할 수 없습니다.",
+        "firmware-version": "펌웨어 버전정보를 가져올 수 없습니다.",
+        "sensor-error-404": "센서 Properties에 Notify 값이 없습니다.",
+        "sensor-error-500": "센서 Characteristics 값이 없습니다."
     },
     "title": {
         "qr": "센서 QR 인식",

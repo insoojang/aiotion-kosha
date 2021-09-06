@@ -29,7 +29,8 @@
         "normal-connection": "Normal Connection",
         "abnormal-connection": "[Warning]: Abnormal connection",
         "disConnected": "DisConnected",
-        "unknown" : "unknown"
+        "unknown" : "unknown",
+        "foreign-object " : "[Warning]:Foreign object"
     },
     "qr": {
         "subscription": "If you fit the QR code and barcode within the guide line, it will be automatically recognized.",
@@ -47,7 +48,10 @@
         "invalid-qr": "Invalid QR Code",
         "server" : "Internal Server Error",
         "name-date" : "Please enter your name and date of birth.",
-        "device": "can not be ues if running in a simulator or emulator."
+        "device": "Can not be ues if running in a simulator or emulator.",
+        "firmware-version": "Unable to get firmware version information.",
+        "sensor-error-404": "No Notify value in sensor properties.",
+        "sensor-error-500": "Sensor Characteristics values are missing."
     },
     "title": {
         "qr": "QR Code Scan",

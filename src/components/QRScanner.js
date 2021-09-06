@@ -16,6 +16,7 @@ import { useDispatch } from 'react-redux'
 import { setUuid } from '../redux/reducers'
 import { isEmpty } from 'lodash-es'
 import { qrErrorCheck } from '../utils/common'
+import { jsonParser } from '../utils/parser'
 
 const QrScanner = () => {
     const [scanned, setScanned] = useState(false)
@@ -63,15 +64,11 @@ const QrScanner = () => {
         setScanned(true)
         if (!isEmpty(data)) {
             try {
-                let parsingData = JSON.parse(data)
-                let newParsingData =
-                    typeof parsingData === 'object'
-                        ? parsingData
-                        : JSON.parse(parsingData)
-                if (qrErrorCheck(newParsingData)) {
+                let parsingData = jsonParser(data)
+                if (qrErrorCheck(parsingData)) {
                     throw new Error('QR Code not recognized.')
                 }
-                onConfirmSensor(newParsingData)
+                onConfirmSensor(parsingData)
             } catch (e) {
                 Alert.alert(i18nt('error.qr-recognize'), '', [
                     {
