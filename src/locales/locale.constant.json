@@ -3,6 +3,7 @@
     "NSCameraUsageDescription": "It is necessary for the user to recognize the QR code with the camera and provide the app's server information.",
     "NSBluetoothPeripheralUsageDescription": "User need permission to use and browse peripherals to communicate with the sensor.",
     "NSBluetoothAlwaysUsageDescription": "User need permission to use Bluetooth to communicate with the sensor.",
+    "CFBundleDisplayName": "Scaffolding safety system",
     "action": {
         "cancel": "Cancel",
         "ok": "OK",

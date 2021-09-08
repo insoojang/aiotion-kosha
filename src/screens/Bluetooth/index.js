@@ -331,7 +331,10 @@ const Bluetooth = () => {
             }
             onConnectAndPrepare(Platform.OS === 'android' ? android : ios)
                 .then(() => {
-                    setLoading(false)
+                    // setLoading(false)
+                    setTimeout(() => {
+                        setLoading(false)
+                    }, 3000)
                 })
                 .catch((e) => {
                     console.error(e)
@@ -396,7 +399,12 @@ const Bluetooth = () => {
 
     return (
         <>
-            <Spinner visible={loading} />
+            <Spinner
+                visible={loading}
+                textContent={'체결여부 검사중'}
+                overlayColor={'rgba(0, 0, 0, 0.7)'}
+                textStyle={{ color: 'white' }}
+            />
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <SInfoView>
                     <SInfoDetailView>
