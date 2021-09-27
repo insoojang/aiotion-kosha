@@ -146,10 +146,7 @@ export const checkNotifyProperties = (info) => {
         const characteristics = info.characteristics
         const result = characteristics.reduce(
             (acc, datum) => {
-                if (
-                    Array.isArray(datum.properties) &&
-                    datum.properties.includes('Notify')
-                ) {
+                if (Object.keys(datum.properties).includes('Notify')) {
                     acc = Object.assign({}, datum, { status: 200 })
                 }
                 return acc

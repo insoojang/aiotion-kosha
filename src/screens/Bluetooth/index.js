@@ -258,6 +258,7 @@ const Bluetooth = () => {
                     // 01 : disConnected
                     // 00 : disConnected
                     const convertData = jsonParser(result)
+                    console.log(convertData, '@@@@@@@@@@@@@@@@@@@@@')
                     const fastenedState = !isEmpty(result)
                         ? sensorDataParser(convertData)
                         : '-'
