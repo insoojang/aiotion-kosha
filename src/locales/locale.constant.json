@@ -57,6 +57,7 @@
     "title": {
         "qr": "QR Code Scan",
         "main": "Hanging-scaffolding safety system",
-        "description" :"Communication with Hanging-scaffolding sensor..."
+        "description" :"Communication with Hanging-scaffolding sensor...",
+        "barometer" :"Barometer"
     }
 }

@@ -11,9 +11,9 @@ const sensorDataParser = (value) => {
     const { tilt_sensor, proximity_sensor } = value
     const data = percentageCalc(proximity_sensor, 16384)
     let sensorData = []
-    if (data <= 5) {
+    if (proximity_sensor > 16360) {
         return '3'
-    } else if (data > 5 && data < 10) {
+    } else if (proximity_sensor > 8000) {
         sensorData.push('1')
     } else {
         sensorData.push('0')
