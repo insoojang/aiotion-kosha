@@ -22,8 +22,8 @@
       }
     },
     "android": {
-      "package": "io.aiotion.kosha.app",
-      "versionCode": 1,
+      "package": "com.reactnativeble",
+      "versionCode": 2,
       "icon": "./assets/adaptive-icon.png",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",

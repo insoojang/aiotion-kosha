@@ -3,6 +3,7 @@
     "NSCameraUsageDescription": "It is necessary for the user to recognize the QR code with the camera and provide the app's server information.",
     "NSBluetoothPeripheralUsageDescription": "User need permission to use and browse peripherals to communicate with the sensor.",
     "NSBluetoothAlwaysUsageDescription": "User need permission to use Bluetooth to communicate with the sensor.",
+    "CFBundleDisplayName": "Scaffolding safety system",
     "action": {
         "cancel": "Cancel",
         "ok": "OK",
@@ -11,7 +12,8 @@
         "sensor-select": "Do you want to connect to that sensor?",
         "connection-success" : "Connection success",
         "disconnect-success" : "Disconnected",
-        "connection-fail" : "Connection failed"
+        "connection-fail" : "Connection failed",
+        "bluetooth-off" : "please turn on bluetooth"
     },
     "common": {
         "all": "All",
@@ -27,7 +29,9 @@
         "off": "disconnect",
         "normal-connection": "Normal Connection",
         "abnormal-connection": "[Warning]: Abnormal connection",
-        "disConnected": "DisConnected"
+        "disConnected": "DisConnected",
+        "unknown" : "unknown",
+        "foreign-object " : "[Warning]:Foreign object"
     },
     "qr": {
         "subscription": "If you fit the QR code and barcode within the guide line, it will be automatically recognized.",
@@ -45,10 +49,15 @@
         "invalid-qr": "Invalid QR Code",
         "server" : "Internal Server Error",
         "name-date" : "Please enter your name and date of birth.",
-        "device": "can not be ues if running in a simulator or emulator."
+        "device": "Can not be ues if running in a simulator or emulator.",
+        "firmware-version": "Unable to get firmware version information.",
+        "sensor-error-404": "No Notify value in sensor properties.",
+        "sensor-error-500": "Sensor Characteristics values are missing."
     },
     "title": {
         "qr": "QR Code Scan",
-        "main": "Fall arrest safety system"
+        "main": "Hanging-scaffolding safety system",
+        "description" :"Communication with Hanging-scaffolding sensor...",
+        "barometer" :"Barometer"
     }
 }

@@ -67,7 +67,11 @@ const Bluetooth = () => {
     const qrValue = useSelector((state) => state.qr)
     const qrValueRef = useRef()
     const appState = useAppState(null)
-
+    const onClearNoti = async (peripheral) => {
+        const info = await BleManager.retrieveServices(peripheral)
+        const { status, characteristic, service } = checkNotifyProperties(info)
+        await BleManager.stopNotification(peripheral, service, characteristic)
+    }
     const onClear = () => {
         setLoading(false)
         setFastened(null)
@@ -77,9 +81,22 @@ const Bluetooth = () => {
             'BleManagerDidUpdateValueForCharacteristic',
         )
         bleManagerEmitter.removeAllListeners('BleManagerDidUpdateState')
-        bleManagerEmitter.removeAllListeners('BleManagerDisconnectPeripheral')
+        // bleManagerEmitter.removeAllListeners('BleManagerDisconnectPeripheral')
     }
-
+    const onAllClear = debounce(() => {
+        const { ios, android } = qrValue
+        const peripheral = Platform.OS === 'android' ? android : ios
+        if (peripheral) {
+            onClearNoti(peripheral).then(() => {
+                onDisconnect()
+                onClear()
+            })
+        } else {
+            onDisconnect()
+            onClear()
+        }
+        onDisconnectService()
+    }, 200)
     const onConnect = debounce(() => {
         try {
             checkNameAndDate()
@@ -105,6 +122,7 @@ const Bluetooth = () => {
             if (android && ios) {
                 BleManager.disconnect(Platform.OS === 'android' ? android : ios)
                     .then(() => {
+                        console.log('onDisconnect')
                         Alert.alert(
                             message || i18nt('action.disconnect-success'),
                             '',
@@ -177,9 +195,8 @@ const Bluetooth = () => {
                 console.log('service Success')
             })
             .catch((e) => {
+                onAllClear()
                 console.error(e)
-                onDisconnect(i18nt('error.server'))
-                onClear()
             })
     }
 
@@ -200,48 +217,144 @@ const Bluetooth = () => {
             })
     }
 
-    const onConnectAndPrepare = async (peripheral) => {
-        if (isEmpty(peripheral) || connectionState) {
-            setLoading(false)
-            // warnAlert()
+    const onDisconnectService = debounce(() => {
+        if (isEmpty(qrValueRef) || isEmpty(qrValueRef.current)) {
             return
         }
-        try {
-            BleManager.connect(peripheral)
-                .then((v) => {
-                    BleManager.retrieveServices(peripheral).then((info) => {
-                        const {
-                            status,
-                            characteristic,
-                            service,
-                        } = checkNotifyProperties(info)
-                        if (status === 200) {
-                            setTimeout(
-                                async () =>
-                                    await BleManager.startNotification(
-                                        peripheral,
-                                        service,
-                                        characteristic,
-                                    ),
-                                3000,
-                            )
-                        } else {
-                            console.error(
-                                `[ERROR] : ${i18nt(
-                                    `error.sensor-error-${status}`,
-                                )}`,
-                            )
-                        }
-                    })
+        const { android, server } = qrValueRef?.current
+        if (android && !isEmpty(server)) {
+            const param = {
+                empName: '-',
+                empBirth: '-',
+                connected: false,
+                fastened: '00',
+            }
+            saveBluetooteData({
+                url: server,
+                resourceKey: android,
+                param,
+            })
+                .then((r) => {
+                    i18nt('action.disconnect-success')
+                    console.log('onDisconnectService Success')
                 })
                 .catch((e) => {
-                    console.log(e)
+                    warnAlert({
+                        message: i18nt('action.connection-fail'),
+                        error: e,
+                        state: setConnectionState,
+                    })
                 })
+        }
+    }, 300)
 
+    useEffect(() => {
+        if (bluetoothState === 'off') {
+            Alert.alert(i18nt('action.bluetooth-off'))
+            onAllClear()
+        }
+        bleManagerEmitter.addListener('BleManagerDidUpdateState', (args) => {
+            if (args?.state !== bluetoothState) {
+                setBluetoothState(args.state)
+            }
+        })
+    }, [bluetoothState])
+
+    const debounceOnConnectAndPrepare = debounce((value) => {
+        onConnectAndPrepare(value)
+            .then((v) => {
+                successAlert()
+            })
+            .catch((e) => {
+                console.error(`[ERROR] : ${i18nt(`error.sensor-error-${e}`)}`)
+                onAllClear()
+            })
+        setTimeout(() => {
+            BleManager.isPeripheralConnected(value, []).then((state) => {
+                setLoading(false)
+                if (!state) {
+                    warnAlert({
+                        message: i18nt('action.connection-fail'),
+                    })
+                }
+            })
+        }, 5000)
+    }, 200)
+    useEffect(() => {
+        if (!qrErrorCheck(qrValue)) {
+            const { ios, android, server } = qrValue
+            if (connectionState) {
+                fetchVersionData(server)
+            }
+            const peripheral = Platform.OS === 'android' ? android : ios
+            debounceOnConnectAndPrepare(peripheral)
+        }
+    }, [qrValue])
+
+    //First Start Logic
+    useEffect(() => {
+        BleManager.start({ showAlert: false })
+        BleManager.checkState()
+        bleManagerEmitter.addListener('BleManagerDisconnectPeripheral', () => {
+            if (connectionState) {
+                onAllClear()
+            }
+        })
+        permissionsAndroid()
+        return () => {
+            onAllClear()
+        }
+    }, [])
+
+    //Background mode
+    React.useEffect(() => {
+        if (!isEmpty(appState)) {
+            if (
+                appState === 'background' &&
+                !isEmpty(fastened) &&
+                (fastened === '10' || fastened === '11')
+            ) {
+                console.log('background Mode', fastened)
+                // const sleep = (time) =>
+                //     new Promise((resolve) => setTimeout(() => resolve(), time))
+                // const { server, android } = qrValue
+                // const param = {
+                //     empName: name,
+                //     empBirth: date,
+                //     connected: true,
+                //     fastened: fastened,
+                //     battery: '125v',
+                // }
+                //
+                // const backGroundTask = async (taskData) => {
+                //     const { delay } = taskData
+                //     //  background task 무한유지 로직
+                //     for (let i = 0; BackgroundService.isRunning(); i++) {
+                //         fetchBluetoothData({
+                //             server,
+                //             resourceKey: android,
+                //             param,
+                //         })
+                //         await sleep(delay)
+                //     }
+                // }
+                // BackgroundService.start(backGroundTask, backgroundOptions)
+            } else {
+                BackgroundService.stop()
+            }
+        }
+    }, [appState])
+
+    const onConnectAndPrepare = async (uuid) => {
+        await BleManager.connect(uuid)
+        const info = await BleManager.retrieveServices(uuid)
+        const { status, characteristic, service } = checkNotifyProperties(info)
+
+        if (status === 200) {
             setFastened('01')
-            qrValueRef.current = qrValue
             setConnectionState(true)
-            successAlert()
+            qrValueRef.current = qrValue
+            await BleManager.startNotification(uuid, service, characteristic)
             bleManagerEmitter.addListener(
                 'BleManagerDidUpdateValueForCharacteristic',
                 ({ value }) => {
@@ -273,136 +386,14 @@ const Bluetooth = () => {
                     fetchBluetoothData({ server, resourceKey: android, param })
                 },
             )
-        } catch (e) {
-            console.error(e)
-            setLoading(false)
-            // onDisconnect(qrValue, i18nt('action.connection-fail'))
-            // onClear()
         }
     }
-
-    const onDisconnectService = () => {
-        onClear()
-        if (isEmpty(qrValueRef) || isEmpty(qrValueRef.current)) {
-            return
-        }
-        const { android, server } = qrValueRef?.current
-        if (android && !isEmpty(server)) {
-            const param = {
-                empName: '-',
-                empBirth: '-',
-                connected: false,
-                fastened: '00',
-            }
-            saveBluetooteData({
-                url: server,
-                resourceKey: android,
-                param,
-            })
-                .then((r) => {
-                    console.log('service Success')
-                })
-                .catch((e) => {
-                    warnAlert({
-                        message: i18nt('action.connection-fail'),
-                        error: e,
-                        state: setConnectionState,
-                    })
-                })
-        }
-    }
-
-    useEffect(() => {
-        if (bluetoothState === 'off') {
-            Alert.alert(i18nt('action.bluetooth-off'))
-        }
-        bleManagerEmitter.addListener('BleManagerDidUpdateState', (args) => {
-            if (args?.state !== bluetoothState) {
-                setBluetoothState(args.state)
-            }
-        })
-    }, [bluetoothState])
-
-    useEffect(() => {
-        if (!qrErrorCheck(qrValue)) {
-            const { ios, android, server } = qrValue
-            setLoading(true)
-            if (connectionState) {
-                fetchVersionData(server)
-            }
-            onConnectAndPrepare(Platform.OS === 'android' ? android : ios)
-                .then(() => {
-                    // setLoading(false)
-                    setTimeout(() => {
-                        setLoading(false)
-                    }, 3000)
-                })
-                .catch((e) => {
-                    console.error(e)
-                    onDisconnect(i18nt('action.connection-fail'))
-                    onClear()
-                })
-        }
-    }, [qrValue])
-
-    //First Start Logic
-    useEffect(() => {
-        BleManager.start({ showAlert: false })
-        BleManager.checkState()
-        bleManagerEmitter.addListener('BleManagerDisconnectPeripheral', () => {
-            onDisconnectService()
-        })
-        permissionsAndroid()
-        return () => {
-            onDisconnect()
-            onClear()
-        }
-    }, [])
-
-    //Background mode
-    React.useEffect(() => {
-        if (!isEmpty(appState)) {
-            if (
-                appState === 'background' &&
-                !isEmpty(fastened) &&
-                (fastened === '10' || fastened === '11')
-            ) {
-                console.log('background', fastened)
-                // const sleep = (time) =>
-                //     new Promise((resolve) => setTimeout(() => resolve(), time))
-                // const { server, android } = qrValue
-                // const param = {
-                //     empName: name,
-                //     empBirth: date,
-                //     connected: true,
-                //     fastened: fastened,
-                //     battery: '125v',
-                // }
-                //
-                // const backGroundTask = async (taskData) => {
-                //     const { delay } = taskData
-                //     //  background task 무한유지 로직
-                //     for (let i = 0; BackgroundService.isRunning(); i++) {
-                //         fetchBluetoothData({
-                //             server,
-                //             resourceKey: android,
-                //             param,
-                //         })
-                //         await sleep(delay)
-                //     }
-                // }
-                // BackgroundService.start(backGroundTask, backgroundOptions)
-            } else {
-                BackgroundService.stop()
-            }
-        }
-    }, [appState])
 
     return (
         <>
             <Spinner
                 visible={loading}
-                textContent={'체결여부 검사중'}
+                // textContent={'체결여부 검사중'}
                 overlayColor={'rgba(0, 0, 0, 0.7)'}
                 textStyle={{ color: 'white' }}
             />
@@ -526,10 +517,7 @@ const Bluetooth = () => {
                         borderColor: colorSet.primary,
                     }}
                     titleStyle={{ color: colorSet.primary }}
-                    onPress={() => {
-                        onDisconnect()
-                        onClear()
-                    }}
+                    onPress={onAllClear}
                     title={i18nt('action.disconnect')}
                     disabled={!connectionState}
                 />

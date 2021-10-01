@@ -3,15 +3,17 @@
     "NSCameraUsageDescription": "사용자가 카메라로 QR 코드를 인식하여 앱의 서버 정보를 제공하는데 필요합니다.",
     "NSBluetoothPeripheralUsageDescription": "사용자가 센서와 통신하기 위하여 주변장치 사용 및 탐색 권한이 필요합니다.",
     "NSBluetoothAlwaysUsageDescription": "사용자가 센서와 통신하기 위하여 블루투스 사용 권한이 필요합니다.",
+    "CFBundleDisplayName": "달비계 안전 시스템",
     "action": {
         "cancel": "취소",
         "ok": "확인",
         "disconnect": "센서 해제",
         "connection": "센서 연결",
-        "sensor-select": "해당 센서로 연결 하시겠습니까?",
+        "sensor-select": "추락 방지대 센서를 연결 하시겠습니까?",
         "connection-success" : "연결 성공",
         "disconnect-success" : "연결 해제됨",
-        "connection-fail" : "연결 실패"
+        "connection-fail" : "연결 실패",
+        "bluetooth-off" : "블루투스를 켜주세요."
     },
     "common": {
         "all": "전체",
@@ -26,12 +28,9 @@
         "off": "연결 안됨",
         "normal-connection": "안전 체결",
         "abnormal-connection": "[경고]:역방향 체결",
-        "disConnected": "체결 안됨"
-    },
-    "rope": {
-        "on": "체결됨",
-        "off": "체결 안됨",
-        "unsafe": "[경고]:불안전 체결"
+        "disconnected": "체결 안됨",
+        "unknown" : "알수없음",
+        "foreign-object" : "[경고]:이물질"
     },
     "qr": {
         "subscription": "안내선 안에 QR 코드 및 바코드를 맞추면 자동으로 인식됩니다.",
@@ -49,10 +48,15 @@
         "qr-recognize": "QR 코드를 인식할 수 없습니다.",
         "server" : "서버로부터 응답할 수 없는 에러가 발생했습니다.",
         "name-date" : "이름과 생년월일을 입력하세요.",
-        "device": "시뮬레이터 또는 에뮬레이터에서 실행중인 경우 사용할 수 없습니다."
+        "device": "시뮬레이터 또는 에뮬레이터에서 실행중인 경우 사용할 수 없습니다.",
+        "firmware-version": "펌웨어 버전정보를 가져올 수 없습니다.",
+        "sensor-error-404": "센서 Properties에 Notify 값이 없습니다.",
+        "sensor-error-500": "센서 Characteristics 값이 없습니다."
     },
     "title": {
         "qr": "센서 QR 인식",
-        "main": "추락방지 안전 시스템"
+        "main": "달비계 안전 시스템",
+        "description" : "달비계 추락방지 센서 통신중...",
+        "barometer": "기압계"
     }
 }
