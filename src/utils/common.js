@@ -38,9 +38,9 @@ export const fastenedMessage = (value) => {
         case value === '10':
             return i18nt('sensor.abnormal-connection')
         case value === '01':
-            return i18nt('sensor.disconnected')
+            return i18nt('sensor.not-fastened')
         case value === '00':
-            return i18nt('sensor.disconnected')
+            return i18nt('sensor.not-fastened')
         case value === '3':
             return i18nt('sensor.foreign-object')
         default:
@@ -143,17 +143,16 @@ export const percentageCalc = (v, t) => {
 
 export const checkNotifyProperties = (info) => {
     if (info?.characteristics) {
-        const characteristics = info.characteristics
-        const result = characteristics.reduce(
+        const characteristic = info.characteristics
+        return characteristic.reduce(
             (acc, datum) => {
-                if (Object.keys(datum.properties).includes('Notify')) {
+                if (Object.values(datum.properties).includes('Notify')) {
                     acc = Object.assign({}, datum, { status: 200 })
                 }
                 return acc
             },
             { status: 400 },
         )
-        return result
     }
     return { status: 500 }
 }
