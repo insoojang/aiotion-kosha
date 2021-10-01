@@ -13,6 +13,7 @@
         "connection-success" : "Connection success",
         "disconnect-success" : "Disconnected",
         "connection-fail" : "Connection failed",
+        "disabled" : "disconnected",
         "bluetooth-off" : "please turn on bluetooth"
     },
     "common": {
@@ -22,14 +23,13 @@
         "connection-status": "Connection Status",
         "fail-safe": "Fail Safe",
         "enter-name": "Please enter name"
-
     },
     "sensor": {
         "on": "connect",
         "off": "disconnect",
         "normal-connection": "Normal Connection",
         "abnormal-connection": "[Warning]: Abnormal connection",
-        "disConnected": "DisConnected",
+        "not-fastened": "Not Fastened",
         "unknown" : "unknown",
         "foreign-object " : "[Warning]:Foreign object"
     },

@@ -13,6 +13,7 @@
         "connection-success" : "연결 성공",
         "disconnect-success" : "연결 해제됨",
         "connection-fail" : "연결 실패",
+        "disabled" : "연결 끊김",
         "bluetooth-off" : "블루투스를 켜주세요."
     },
     "common": {
@@ -28,7 +29,7 @@
         "off": "연결 안됨",
         "normal-connection": "안전 체결",
         "abnormal-connection": "[경고]:역방향 체결",
-        "disconnected": "체결 안됨",
+        "not-fastened": "체결 안됨",
         "unknown" : "알수없음",
         "foreign-object" : "[경고]:이물질"
     },
