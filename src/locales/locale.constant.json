@@ -14,7 +14,8 @@
         "disconnect-success" : "Disconnected",
         "connection-fail" : "Connection failed",
         "disabled" : "disconnected",
-        "bluetooth-off" : "please turn on bluetooth"
+        "bluetooth-off" : "please turn on bluetooth",
+        "bluetooth-reset" : "\n1) Check the sensor power status.\n2) Try turning Bluetooth off and on or rebooting the app."
     },
     "common": {
         "all": "All",
@@ -52,7 +53,8 @@
         "device": "Can not be ues if running in a simulator or emulator.",
         "firmware-version": "Unable to get firmware version information.",
         "sensor-error-404": "No Notify value in sensor properties.",
-        "sensor-error-500": "Sensor Characteristics values are missing."
+        "sensor-error-500": "Sensor Characteristics values are missing.",
+        "sensor-error-408" : "Connection timeout"
     },
     "title": {
         "qr": "QR Code Scan",

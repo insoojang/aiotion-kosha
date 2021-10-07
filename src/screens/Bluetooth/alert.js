@@ -12,13 +12,13 @@ const successAlert = (message) =>
             },
         ],
     )
-const warnAlert = ({ message, error, state }) => {
+const warnAlert = ({ message, error, state, content }) => {
     if (error) {
         console.error('[ERROR] : warnAlert', error)
     }
     Alert.alert(
         !isEmpty(message) ? message : i18nt('action.connection-fail'),
-        '',
+        content || '',
         [
             {
                 text: i18nt('action.ok'),

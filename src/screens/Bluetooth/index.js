@@ -61,12 +61,14 @@ const Bluetooth = () => {
     const [loading, setLoading] = useState(false)
     const [bluetoothState, setBluetoothState] = useState(null)
     const [firmwareVersion, setFirmwareVersion] = useState(0)
+    const [timeoutCount, setTimeoutCount] = useState(0)
 
     const dispatch = useDispatch()
     const navigation = useNavigation()
     const qrValue = useSelector((state) => state.qr)
     const qrValueRef = useRef()
     const appState = useAppState(null)
+
     const onClearNoti = async (peripheral) => {
         const info = await BleManager.retrieveServices(peripheral)
         const { status, characteristic, service } = checkNotifyProperties(info)
@@ -83,19 +85,33 @@ const Bluetooth = () => {
         bleManagerEmitter.removeAllListeners('BleManagerDidUpdateState')
         // bleManagerEmitter.removeAllListeners('BleManagerDisconnectPeripheral')
     }
-    const onAllClear = debounce(() => {
+
+    const onTriplePress = () => {
+        setTimeoutCount(timeoutCount + 1)
+        if (timeoutCount > 1) {
+            setTimeoutCount(0)
+        }
+    }
+
+    const onAllClear = debounce(async () => {
         const { ios, android } = qrValue
         const peripheral = Platform.OS === 'android' ? android : ios
+        const test = await BleManager.isPeripheralConnected(peripheral, [])
+        console.log('test11', test)
         if (peripheral) {
-            onClearNoti(peripheral).then(() => {
+            const isPeripheralConnected = await BleManager.isPeripheralConnected(
+                peripheral,
+                [],
+            )
+            if (isPeripheralConnected) {
+                await onClearNoti(peripheral)
                 onDisconnect()
-                onClear()
-            })
-        } else {
-            onDisconnect()
-            onClear()
+            }
+            onDisconnectService()
         }
-        onDisconnectService()
+        delayFunction().then(() => {
+            onClear()
+        })
     }, 200)
     const onConnect = debounce(() => {
         try {
@@ -235,7 +251,6 @@ const Bluetooth = () => {
                 param,
             })
                 .then((r) => {
-                    i18nt('action.disconnect-success')
                     console.log('onDisconnectService Success')
                 })
                 .catch((e) => {
@@ -264,21 +279,25 @@ const Bluetooth = () => {
         onConnectAndPrepare(value)
             .then((v) => {
                 successAlert()
+                if (timeoutCount > 1) {
+                    setTimeoutCount(0)
+                }
+                setLoading(false)
             })
             .catch((e) => {
+                if (e === '408') {
+                    warnAlert({
+                        message: i18nt(`error.sensor-error-${e}`),
+                        content:
+                            timeoutCount === 2
+                                ? i18nt(`action.bluetooth-reset`)
+                                : '',
+                        state: onTriplePress(),
+                    })
+                }
                 console.error(`[ERROR] : ${i18nt(`error.sensor-error-${e}`)}`)
                 onAllClear()
             })
-        setTimeout(() => {
-            BleManager.isPeripheralConnected(value, []).then((state) => {
-                setLoading(false)
-                if (state === false && connectionState === false) {
-                    warnAlert({
-                        message: i18nt('action.connection-fail'),
-                    })
-                }
-            })
-        }, 5000)
     }, 200)
     useEffect(() => {
         if (!qrErrorCheck(qrValue)) {
@@ -294,6 +313,7 @@ const Bluetooth = () => {
     //First Start Logic
     useEffect(() => {
         BleManager.start({ showAlert: false })
+
         BleManager.checkState()
         bleManagerEmitter.addListener('BleManagerDisconnectPeripheral', () => {
             if (connectionState) {
@@ -344,48 +364,91 @@ const Bluetooth = () => {
             }
         }
     }, [appState])
+    const launchFunction = async (promise) => {
+        let timerId = null
+
+        clearTimeout(timerId)
+        let timeout = new Promise((resolve, reject) => {
+            timerId = setTimeout(() => {
+                reject('408')
+            }, 5000)
+        })
+
+        return Promise.race([promise(), timeout])
+    }
+
+    const delayFunction = async () => {
+        let closeTimerId = null
+
+        return new Promise((resolve, reject) => {
+            closeTimerId = setTimeout(() => {
+                resolve()
+            }, 5000)
+        })
+    }
 
     const onConnectAndPrepare = async (uuid) => {
-        await BleManager.connect(uuid)
-        const info = await BleManager.retrieveServices(uuid)
-        const { status, characteristic, service } = checkNotifyProperties(info)
-
-        if (status === 200) {
-            setFastened('01')
-            setConnectionState(true)
-            qrValueRef.current = qrValue
-            await BleManager.startNotification(uuid, service, characteristic)
-            bleManagerEmitter.addListener(
-                'BleManagerDidUpdateValueForCharacteristic',
-                ({ value }) => {
-                    const asciiCode = isEmptyASCII(value)
-
-                    const result = JSON.stringify(
-                        String.fromCharCode(...asciiCode),
-                    )
-                    // Convert bytes array to string
-                    const { server, android } = qrValue
-                    //fastenedState :
-                    // 11 : normal connection
-                    // 10 : Abnormal connection
-                    // 01 : disConnected
-                    // 00 : disConnected
-                    const convertData = jsonParser(result)
-                    console.log(convertData, '@@@@@@@@@@@@@@@@@@@@@')
-                    const fastenedState = !isEmpty(result)
-                        ? sensorDataParser(convertData)
-                        : '-'
-                    setFastened(fastenedState)
-                    const param = {
-                        empName: name,
-                        empBirth: date,
-                        connected: true,
-                        fastened: fastenedState,
-                        battery: convertData?.battery,
-                    }
-                    fetchBluetoothData({ server, resourceKey: android, param })
-                },
+        const clearConnect = await BleManager.isPeripheralConnected(uuid, [])
+        if (clearConnect) {
+            await BleManager.disconnect(uuid)
+        }
+        setLoading(true)
+        await launchFunction(() => BleManager.connect(uuid))
+        const isPeripheralConnected = await BleManager.isPeripheralConnected(
+            uuid,
+            [],
+        )
+        if (isPeripheralConnected) {
+            const info = await BleManager.retrieveServices(uuid)
+            const { status, characteristic, service } = checkNotifyProperties(
+                info,
             )
+
+            if (status === 200) {
+                setFastened('01')
+                setConnectionState(true)
+                qrValueRef.current = qrValue
+                await BleManager.startNotification(
+                    uuid,
+                    service,
+                    characteristic,
+                )
+                bleManagerEmitter.addListener(
+                    'BleManagerDidUpdateValueForCharacteristic',
+                    ({ value }) => {
+                        const asciiCode = isEmptyASCII(value)
+
+                        const result = JSON.stringify(
+                            String.fromCharCode(...asciiCode),
+                        )
+                        // Convert bytes array to string
+                        const { server, android } = qrValue
+                        //fastenedState :
+                        // 11 : normal connection
+                        // 10 : Abnormal connection
+                        // 01 : disConnected
+                        // 00 : disConnected
+                        const convertData = jsonParser(result)
+                        console.log(convertData, '@@@@@@@@@@@@@@@@@@@@@')
+                        const fastenedState = !isEmpty(result)
+                            ? sensorDataParser(convertData)
+                            : '-'
+                        setFastened(fastenedState)
+                        const param = {
+                            empName: name,
+                            empBirth: date,
+                            connected: true,
+                            fastened: fastenedState,
+                            battery: convertData?.battery,
+                        }
+                        fetchBluetoothData({
+                            server,
+                            resourceKey: android,
+                            param,
+                        })
+                    },
+                )
+            }
         }
     }
 
@@ -517,7 +580,10 @@ const Bluetooth = () => {
                         borderColor: colorSet.primary,
                     }}
                     titleStyle={{ color: colorSet.primary }}
-                    onPress={onAllClear}
+                    onPress={() => {
+                        setLoading(true)
+                        onAllClear()
+                    }}
                     title={i18nt('action.disconnect')}
                     disabled={!connectionState}
                 />
