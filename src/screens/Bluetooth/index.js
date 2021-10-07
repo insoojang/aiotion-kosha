@@ -272,7 +272,7 @@ const Bluetooth = () => {
         setTimeout(() => {
             BleManager.isPeripheralConnected(value, []).then((state) => {
                 setLoading(false)
-                if (!state) {
+                if (state === false && connectionState === false) {
                     warnAlert({
                         message: i18nt('action.connection-fail'),
                     })
