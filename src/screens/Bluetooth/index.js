@@ -97,7 +97,6 @@ const Bluetooth = () => {
         const { ios, android } = qrValue
         const peripheral = Platform.OS === 'android' ? android : ios
         const test = await BleManager.isPeripheralConnected(peripheral, [])
-        console.log('test11', test)
         if (peripheral) {
             const isPeripheralConnected = await BleManager.isPeripheralConnected(
                 peripheral,
@@ -294,6 +293,14 @@ const Bluetooth = () => {
                                 : '',
                         state: onTriplePress(),
                     })
+                } else if (e === '404' || e === '500') {
+                    warnAlert({
+                        message: i18nt(`error.sensor-error-${e}`),
+                    })
+                } else {
+                    warnAlert({
+                        message: i18nt(`action.connection-fail`),
+                    })
                 }
                 console.error(`[ERROR] : ${i18nt(`error.sensor-error-${e}`)}`)
                 onAllClear()
@@ -380,10 +387,10 @@ const Bluetooth = () => {
     const delayFunction = async () => {
         let closeTimerId = null
 
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             closeTimerId = setTimeout(() => {
                 resolve()
-            }, 5000)
+            }, 3000)
         })
     }
 
