@@ -9,7 +9,7 @@
     ],
     "ios": {
       "bundleIdentifier": "io.aiotion.kosha.app",
-      "buildNumber": "1.4.0",
+      "buildNumber": "1.4.3",
       "supportsTablet": true,
       "infoPlist": {
         "CFBundleAllowMixedLocalizations": true,
@@ -23,7 +23,7 @@
     },
     "android": {
       "package": "com.reactnativeble",
-      "versionCode": 4,
+      "versionCode": 6,
       "icon": "./assets/adaptive-icon.png",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
