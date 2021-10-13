@@ -1,5 +1,5 @@
 //14co
-const snesor_14co = () => {
+const sensor_14co = () => {
     const uuid = {
         server: 'http://121.78.87.165',
         ios: 'D88F794C-1DAD-FE3C-070C-E9D356A6518F',
@@ -70,14 +70,19 @@ const snesor_14co = () => {
         },
     ]
 }
+const sensor_db22 = () => {
+    const uuid = {
+        server: 'http://121.78.87.165',
+        ios: '402B7871-FF11-E35B-27DF-AF41DE837AE9',
+        android: 'F1:83:8C:30:DB:22',
+    }
 
-const sensor_49e6 = {
-    server: 'http://121.78.87.165',
-    ios: '21EBD060-DFDA-D824-31EC-CB921F344F1E',
-    android: 'D0:AB:8D:97:49:E6',
 }
-const sensor_d4e4 = {
-    server: 'http://121.78.87.165',
-    ios: '2AD63190-035A-9AB9-E53F-CDE7968F544D',
-    android: 'C7:C9:A6:CF:D4:E4',
+const sensor_8205 = () => {
+    const uuid = {
+        server: 'http://121.78.87.165',
+        ios: '1C580078-DA58-B651-0CAE-4C3CAB3344DA',
+        android: 'E6:FA:3F:24:82:05',
+    }
+
 }
