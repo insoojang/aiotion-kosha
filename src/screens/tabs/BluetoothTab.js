@@ -1,7 +1,7 @@
 import React from 'react'
 import { ScrollView, TouchableOpacity } from 'react-native'
 import { S_BluetoothView } from './BluetoothStyle'
-import Bluetooth from '../Bluetooth'
+import Bluetooth from '../main'
 import { colorSet } from '../../styles/colors'
 import { responsiveHeight } from 'react-native-responsive-dimensions'
 
