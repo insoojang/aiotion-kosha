@@ -48,6 +48,7 @@ import BackgroundService from 'react-native-background-actions'
 import { jsonParser, sensorDataParser } from '../../utils/parser'
 import { successAlert, warnAlert } from './alert'
 import { permissionsAndroid } from '../../utils/permissions'
+import { Audio } from 'expo-av'
 
 const BleManagerModule = NativeModules.BleManager
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule)
@@ -62,6 +63,8 @@ const Bluetooth = () => {
     const [bluetoothState, setBluetoothState] = useState(null)
     const [firmwareVersion, setFirmwareVersion] = useState(0)
     const [timeoutCount, setTimeoutCount] = useState(0)
+    const [soundState, setSoundState] = React.useState()
+    const [soundPlay, setSoundPlay] = React.useState(false)
 
     const dispatch = useDispatch()
     const navigation = useNavigation()
@@ -83,6 +86,11 @@ const Bluetooth = () => {
             'BleManagerDidUpdateValueForCharacteristic',
         )
         bleManagerEmitter.removeAllListeners('BleManagerDidUpdateState')
+        if (!isEmpty(soundState)) {
+            soundState.unloadAsync().then(() => {
+                console.log('sound unloadAsync')
+            })
+        }
         // bleManagerEmitter.removeAllListeners('BleManagerDisconnectPeripheral')
     }
 
@@ -395,6 +403,11 @@ const Bluetooth = () => {
     }
 
     const onConnectAndPrepare = async (uuid) => {
+        const { sound } = await Audio.Sound.createAsync(
+            require('../../../assets/alarm_sound.mp3'),
+        )
+        setSoundState(sound)
+
         const clearConnect = await BleManager.isPeripheralConnected(uuid, [])
         if (clearConnect) {
             await BleManager.disconnect(uuid)
@@ -410,7 +423,6 @@ const Bluetooth = () => {
             const { status, characteristic, service } = checkNotifyProperties(
                 info,
             )
-
             if (status === 200) {
                 setFastened('01')
                 setConnectionState(true)
@@ -420,6 +432,8 @@ const Bluetooth = () => {
                     service,
                     characteristic,
                 )
+                const fastenedQueue = []
+
                 bleManagerEmitter.addListener(
                     'BleManagerDidUpdateValueForCharacteristic',
                     ({ value }) => {
@@ -436,11 +450,32 @@ const Bluetooth = () => {
                         // 01 : disConnected
                         // 00 : disConnected
                         const convertData = jsonParser(result)
-                        console.log(convertData, '@@@@@@@@@@@@@@@@@@@@@')
                         const fastenedState = !isEmpty(result)
                             ? sensorDataParser(convertData)
                             : '-'
                         setFastened(fastenedState)
+                        // console.log(convertData, '@@@@@@@@@@@@@@@@@')
+                        if (fastenedQueue.length > 2) {
+                            fastenedQueue.shift()
+                            fastenedQueue.push(fastenedState)
+                        } else {
+                            fastenedQueue.push(fastenedState)
+                        }
+
+                        if (fastenedState === '10') {
+                            if (
+                                !soundPlay &&
+                                fastenedQueue.every((v) => v === '10')
+                            ) {
+                                playSound(sound)
+                            } else {
+                                stopSound(sound)
+                            }
+                        }
+
+                        if (fastenedState !== '10' || !isEmpty(sound)) {
+                            stopSound(sound)
+                        }
                         const param = {
                             empName: name,
                             empBirth: date,
@@ -458,7 +493,18 @@ const Bluetooth = () => {
             }
         }
     }
+    const playSound = async (sound) => {
+        if (!soundPlay) {
+            setSoundPlay(true)
 
+            await sound?.setIsLoopingAsync(true)
+            await sound?.playAsync()
+        }
+    }
+    const stopSound = async (sound) => {
+        await sound?.stopAsync()
+        setSoundPlay(false)
+    }
     return (
         <>
             <Spinner
