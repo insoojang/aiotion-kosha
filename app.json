@@ -23,7 +23,7 @@
     },
     "android": {
       "package": "com.reactnativeble",
-      "versionCode": 6,
+      "versionCode": 7,
       "icon": "./assets/adaptive-icon.png",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
