@@ -2,7 +2,7 @@
   "expo": {
     "name": "aiotion-kosha",
     "slug": "aiotion-kosha",
-    "version": "3.0.0",
+    "version": "3.0.1",
     "icon": "./assets/icon.png",
     "assetBundlePatterns": [
       "**/*"
@@ -23,7 +23,7 @@
     },
     "android": {
       "package": "com.reactnativeble",
-      "versionCode": 7,
+      "versionCode": 8,
       "icon": "./assets/adaptive-icon.png",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
