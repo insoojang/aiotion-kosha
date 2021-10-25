@@ -454,7 +454,7 @@ const Bluetooth = () => {
                             ? sensorDataParser(convertData)
                             : '-'
                         setFastened(fastenedState)
-                        // console.log(convertData, '@@@@@@@@@@@@@@@@@')
+                        console.log(convertData, '@@@@@@@@@@@@@@@@@')
                         if (fastenedQueue.length > 2) {
                             fastenedQueue.shift()
                             fastenedQueue.push(fastenedState)
