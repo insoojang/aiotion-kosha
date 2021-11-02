@@ -76,7 +76,6 @@ const sensor_db22 = () => {
         ios: '402B7871-FF11-E35B-27DF-AF41DE837AE9',
         android: 'F1:83:8C:30:DB:22',
     }
-
 }
 const sensor_8205 = () => {
     const uuid = {
@@ -84,5 +83,12 @@ const sensor_8205 = () => {
         ios: '1C580078-DA58-B651-0CAE-4C3CAB3344DA',
         android: 'E6:FA:3F:24:82:05',
     }
+}
 
+const sensor_26cb = () => {
+    const uuid = {
+        server: 'http://121.78.87.165',
+        ios: '51E5CB4A-3136-4431-BD88-B8424EA2C929',
+        android: 'C4:1B:24:8D:26:CB',
+    }
 }
