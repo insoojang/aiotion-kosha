@@ -1,4 +1,5 @@
 import { percentageCalc, sensorDataCheck } from './common'
+import { isEmpty } from 'lodash-es'
 
 const jsonParser = (value) => {
     let originData = typeof value === 'object' ? value : JSON.parse(value)
@@ -8,7 +9,7 @@ const sensorDataParser = (value) => {
     if (sensorDataCheck(value)) {
         return '00'
     }
-    const { tilt_sensor, proximity_sensor } = value
+    const { tilt_sensor, proximity_sensor, sensor_type } = value
     const data = percentageCalc(proximity_sensor, 16384)
     let sensorData = []
     // if (proximity_sensor > 16360) {
@@ -22,7 +23,11 @@ const sensorDataParser = (value) => {
     } else {
         sensorData.push('0')
     }
-    sensorData.push(tilt_sensor)
+    if (!isEmpty(sensor_type) && sensor_type === '0') {
+        sensorData.push('1')
+    } else {
+        sensorData.push(tilt_sensor)
+    }
     return sensorData.join('')
 }
 

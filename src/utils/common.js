@@ -117,18 +117,13 @@ export const sensorDataCheck = (value) => {
     switch (true) {
         case isEmpty(value):
             return true
-        case Object.keys(value).length < 4:
-            return true
-        case !value.hasOwnProperty('tilt_sensor'):
-            return true
         case !value.hasOwnProperty('proximity_sensor'):
             return true
         case !value.hasOwnProperty('battery'):
             return true
         case !value.hasOwnProperty('version'):
             return true
-        case isEmpty(value.tilt_sensor) &&
-            isEmpty(value.proximity_sensor) &&
+        case isEmpty(value.proximity_sensor) &&
             isEmpty(value.battery) &&
             isEmpty(value.version):
             return true
