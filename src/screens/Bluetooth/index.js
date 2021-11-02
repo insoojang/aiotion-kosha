@@ -7,7 +7,7 @@ import {
     TouchableWithoutFeedback,
     Platform,
 } from 'react-native'
-import { Button, Input } from 'react-native-elements'
+import { Button, Input, Text } from 'react-native-elements'
 import BleManager from 'react-native-ble-manager'
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from 'react-redux'
@@ -63,6 +63,7 @@ const Bluetooth = () => {
     const [bluetoothState, setBluetoothState] = useState(null)
     const [firmwareVersion, setFirmwareVersion] = useState(0)
     const [timeoutCount, setTimeoutCount] = useState(0)
+    const [testValue, setTestValue] = useState()
     // const [soundState, setSoundState] = React.useState()
     // const [soundPlay, setSoundPlay] = React.useState(false)
 
@@ -104,7 +105,6 @@ const Bluetooth = () => {
     const onAllClear = debounce(async () => {
         const { ios, android } = qrValue
         const peripheral = Platform.OS === 'android' ? android : ios
-        const test = await BleManager.isPeripheralConnected(peripheral, [])
         if (peripheral) {
             const isPeripheralConnected = await BleManager.isPeripheralConnected(
                 peripheral,
@@ -453,7 +453,11 @@ const Bluetooth = () => {
                         const fastenedState = !isEmpty(result)
                             ? sensorDataParser(convertData)
                             : '-'
+
                         setFastened(fastenedState)
+                        if (!isEmpty(convertData.proximity_sensor)) {
+                            setTestValue(convertData.proximity_sensor)
+                        }
                         console.log(convertData, '@@@@@@@@@@@@@@@@@')
                         // if (fastenedQueue.length > 2) {
                         //     fastenedQueue.shift()
@@ -612,7 +616,9 @@ const Bluetooth = () => {
                     </SInfoDetailView>
                 </SInfoView>
             </TouchableWithoutFeedback>
-
+            <Text>
+                {isEmpty(testValue) ? null : `proximity_sensor : ${testValue}`}
+            </Text>
             <SView_ButtonGroup>
                 <Button
                     buttonStyle={{
