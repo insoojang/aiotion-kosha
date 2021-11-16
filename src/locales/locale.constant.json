@@ -14,7 +14,6 @@
         "disconnect-success" : "Disconnected",
         "connection-fail" : "Connection failed",
         "disabled" : "disconnected",
-        "bluetooth-off" : "please turn on bluetooth",
         "bluetooth-reset" : "\n1) Check the sensor power status.\n2) Try turning Bluetooth off and on or rebooting the app."
     },
     "common": {
@@ -57,9 +56,24 @@
         "sensor-error-408" : "Connection timeout"
     },
     "title": {
-        "qr": "QR Code Scan",
+        "qr": "QR/BarCode",
         "main": "Worker safety management",
         "description" :"Communication with Hanging-scaffolding sensor...",
-        "barometer" :"Barometer"
+        "barometer" :"Barometer",
+        "sensor": "Sensor",
+        "scan" : "Scan"
+    },
+    "login": {
+        "header": "Worker Input",
+        "name:":"Name is required",
+        "date-of-birth": "Please enter your date of birth.(ex:YYMMDD)"
+    },
+    "alarm": {
+        "bluetooth-off": "Bluetooth is OFF.",
+        "no-sensor": "No sensor connected."
+    },
+    "work": {
+        "stop" : "Stop",
+        "start" : "Start"
     }
 }
