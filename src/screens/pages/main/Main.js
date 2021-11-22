@@ -15,6 +15,9 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import BackgroundService from 'react-native-background-actions'
 import { Audio } from 'expo-av'
 import { debounce, isEmpty } from 'lodash-es'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import Spinner from 'react-native-loading-spinner-overlay'
+import { Barometer } from 'expo-sensors'
 
 import ButtonGroup from '../../../components/ButtonGroup'
 import { i18nt } from '../../../utils/i18n'
@@ -55,8 +58,6 @@ import {
     launchFunction,
     sensorErrorAlert,
 } from './func'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import Spinner from 'react-native-loading-spinner-overlay'
 
 const BleManagerModule = NativeModules.BleManager
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule)
@@ -70,6 +71,7 @@ const Main = () => {
     const [soundState, setSoundState] = React.useState()
     const [soundPlay, setSoundPlay] = React.useState(false)
     const [workStatus, setWorkStatus] = React.useState(false)
+    const [barometerData, setBarometerData] = React.useState(0)
 
     const navigation = useNavigation()
     const dispatch = useDispatch()
@@ -78,6 +80,7 @@ const Main = () => {
     const appState = useAppState(null)
     const timerRef = useRef(null)
     const workStatusRef = useRef(null)
+    const barometerRef = useRef(0)
 
     const buttonGroupList = [
         {
@@ -267,8 +270,6 @@ const Main = () => {
         setSoundPlay(false)
     }
 
-
-
     const onConnectAndPrepare = async (uuid) => {
         const { sound } = await Audio.Sound.createAsync(
             require('../../../../assets/alarm_sound.mp3'),
@@ -281,6 +282,7 @@ const Main = () => {
             await BleManager.disconnect(uuid)
         }
         setLoading(true)
+
         await launchFunction(() => BleManager.connect(uuid))
         const isPeripheralConnected = await BleManager.isPeripheralConnected(
             uuid,
@@ -344,6 +346,7 @@ const Main = () => {
                             ? sensorDataParser(convertData)
                             : '-'
                         setFastened(fastenedState)
+
                         console.log(convertData, '@@@@@@@@@@@@@@@@@')
                         if (fastenedQueue.length > 2) {
                             fastenedQueue.shift()
@@ -372,8 +375,11 @@ const Main = () => {
                             connected: true,
                             fastened: fastenedState,
                             battery: convertData?.battery,
-                            work : workStatusRef.current? 'work_start' : 'work_stop'
-                    }
+                            work: workStatusRef.current
+                                ? 'work_start'
+                                : 'work_stop',
+                            atm: barometerRef,
+                        }
                         fetchBluetoothData({
                             server,
                             resourceKey: android,
@@ -405,13 +411,16 @@ const Main = () => {
             })
     }, 200)
 
-    useEffect(()=>{
-
-        if(workStatusRef.current !== workStatus){
-            workStatusRef.current =  workStatus
+    useEffect(() => {
+        if (workStatusRef.current !== workStatus) {
+            workStatusRef.current = workStatus
         }
-
-    },[workStatus])
+    }, [workStatus])
+    useEffect(() => {
+        if (barometerRef.current !== barometerData) {
+            barometerRef.current = barometerData
+        }
+    }, [barometerData])
 
     useEffect(() => {
         if (!qrErrorCheck(qrValue)) {
@@ -433,8 +442,15 @@ const Main = () => {
             onAllClear()
             // }
         })
+        Barometer.setUpdateInterval(10000)
+        if (!Barometer.hasListeners()) {
+            Barometer.addListener(({ pressure }) => {
+                setBarometerData(pressure?.toFixed(3))
+            })
+        }
         permissionsAndroid()
         return () => {
+            Barometer.removeAllListeners()
             // onAllClear()
         }
     }, [])
