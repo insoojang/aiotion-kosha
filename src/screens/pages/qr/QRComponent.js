@@ -107,13 +107,19 @@ const QRComponent = () => {
             },
         ])
     }
-
+    const styles = StyleSheet.create({
+        cameraContainer: {
+            marginHorizontal: 0, marginLeft: 0, marginStart: 0,
+            paddingHorizontal: 0, paddingLeft: 0, paddingStart: 0,
+            height: '110%%',
+        }
+    });
     return (
         <SMainTabContainerView>
             <SafeAreaView
                 style={{
                     flex: 1,
-                    backgroundColor: '#000000',
+                    backgroundColor: 'white',
                 }}
             >
                 <SQRView>
@@ -121,9 +127,7 @@ const QRComponent = () => {
                         onBarCodeScanned={
                             scanned ? undefined : handleBarCodeScanned
                         }
-                        style={StyleSheet.absoluteFillObject}
-                    />
-                    style={StyleSheet.absoluteFillObject}
+                        style={[StyleSheet.absoluteFillObject, styles]}
                     />
                     <SGuidLineWrapperView
                         onLayout={(event) => {

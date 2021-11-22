@@ -21,7 +21,7 @@ export const fetchBluetoothData = ({ server, resourceKey, param }) => {
         resourceKey,
         param,
     })
-        .then((r) => {
+        .then(() => {
             console.log('service Success')
         })
         .catch((e) => {
@@ -40,12 +40,12 @@ export const delayFunction = async () => {
     })
 }
 
-export const sensorErrorAlert = (e, timeoutCount = 0) => {
+export const sensorErrorAlert = (e, timeoutCount = 0, state) => {
     if (e === '408') {
         WarnAlert({
             message: i18nt(`error.sensor-error-${e}`),
             content: timeoutCount === 2 ? i18nt(`action.bluetooth-reset`) : '',
-            state: onTriplePress(),
+            state: state(),
         })
     } else if (e === '404' || e === '500') {
         WarnAlert({

@@ -9,6 +9,7 @@ import { colorSet } from '../../../styles/colors'
 export const SQRView = styled.View`
     flex: 1;
     align-items: center;
+    padding: 0;
 `
 SQRView.displayName = 'SQRView'
 export const SQRScanView = styled.View`

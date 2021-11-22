@@ -65,12 +65,20 @@ const Bluetooth = () => {
     const [timeoutCount, setTimeoutCount] = useState(0)
     const [soundState, setSoundState] = React.useState()
     const [soundPlay, setSoundPlay] = React.useState(false)
+    const timerRef = useRef(null)
 
     const dispatch = useDispatch()
     const navigation = useNavigation()
     const qrValue = useSelector((state) => state.qr)
     const qrValueRef = useRef()
     const appState = useAppState(null)
+
+    const clearBluetoothDataTimer = () => {
+        if (timerRef?.current) {
+            clearInterval(timerRef.current)
+            timerRef.current = null
+        }
+    }
 
     const onClearNoti = async (peripheral) => {
         const info = await BleManager.retrieveServices(peripheral)
@@ -82,6 +90,7 @@ const Bluetooth = () => {
         setFastened(null)
         setConnectionState(false)
         BackgroundService.stop()
+        clearBluetoothDataTimer()
         bleManagerEmitter.removeAllListeners(
             'BleManagerDidUpdateValueForCharacteristic',
         )

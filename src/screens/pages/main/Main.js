@@ -11,6 +11,10 @@ import NativeEventEmitter from 'react-native/Libraries/EventEmitter/NativeEventE
 import { Camera } from 'expo-camera'
 import { useNavigation } from '@react-navigation/native'
 import BleManager from 'react-native-ble-manager'
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
+import BackgroundService from 'react-native-background-actions'
+import { Audio } from 'expo-av'
+import { debounce, isEmpty } from 'lodash-es'
 
 import ButtonGroup from '../../../components/ButtonGroup'
 import { i18nt } from '../../../utils/i18n'
@@ -20,7 +24,6 @@ import { Button, Divider } from 'react-native-elements'
 import { permissionsAndroid } from '../../../utils/permissions'
 import { SCREEN } from '../../../navigation/constants'
 import { SuccessAlert, WarnAlert } from '../../../components/Alerts'
-
 import {
     SView_ContractState,
     SInfoDetailView,
@@ -39,16 +42,12 @@ import {
     qrErrorCheck,
     typeOfFastened,
 } from '../../../utils/common'
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import { fontSizeSet } from '../../../styles/size'
 import { colorSet } from '../../../styles/colors'
-import { debounce, isEmpty } from 'lodash-es'
 import { clearUuid } from '../../../redux/reducers'
 import { saveBluetooteData } from '../../../service/api/bluetooth.service'
-import BackgroundService from 'react-native-background-actions'
 import { useDispatch, useSelector } from 'react-redux'
 import useAppState from '../../../utils/useAppState'
-import { Audio } from 'expo-av'
 import { jsonParser, sensorDataParser } from '../../../utils/parser'
 import {
     delayFunction,
@@ -56,6 +55,8 @@ import {
     launchFunction,
     sensorErrorAlert,
 } from './func'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import Spinner from 'react-native-loading-spinner-overlay'
 
 const BleManagerModule = NativeModules.BleManager
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule)
@@ -68,12 +69,15 @@ const Main = () => {
     const [timeoutCount, setTimeoutCount] = useState(0)
     const [soundState, setSoundState] = React.useState()
     const [soundPlay, setSoundPlay] = React.useState(false)
+    const [workStatus, setWorkStatus] = React.useState(false)
 
     const navigation = useNavigation()
     const dispatch = useDispatch()
     const qrValue = useSelector((state) => state.qr)
     const qrValueRef = useRef()
     const appState = useAppState(null)
+    const timerRef = useRef(null)
+    const workStatusRef = useRef(null)
 
     const buttonGroupList = [
         {
@@ -82,7 +86,7 @@ const Main = () => {
             disabled: serverConnectionStatus,
 
             event: () => {
-                onClickWorkStart()
+                onConnect()
             },
             // route: SCREEN.Scan,
         },
@@ -96,14 +100,19 @@ const Main = () => {
             },
         },
     ]
-    const onClickWorkStart = () => {
-        console.log('workStart')
+
+    const clearBluetoothDataTimer = () => {
+        if (timerRef?.current) {
+            clearInterval(timerRef.current)
+            timerRef.current = null
+        }
     }
 
     const onClearNoti = async (peripheral) => {
         const info = await BleManager.retrieveServices(peripheral)
-        const { status, characteristic, service } = checkNotifyProperties(info)
+        const { characteristic, service } = checkNotifyProperties(info)
         await BleManager.stopNotification(peripheral, service, characteristic)
+        console.log('stopNotification')
     }
 
     const onDisconnect = useCallback(
@@ -157,7 +166,7 @@ const Main = () => {
                 resourceKey: android,
                 param,
             })
-                .then((r) => {
+                .then(() => {
                     console.log('onDisconnectService Success')
                 })
                 .catch((e) => {
@@ -173,8 +182,10 @@ const Main = () => {
     const onClear = () => {
         setLoading(false)
         setFastened(null)
-        setConnectionState(false)
+        setServerConnectionStatus(false)
+        setWorkStatus(false)
         BackgroundService.stop()
+        clearBluetoothDataTimer()
         bleManagerEmitter.removeAllListeners(
             'BleManagerDidUpdateValueForCharacteristic',
         )
@@ -190,15 +201,15 @@ const Main = () => {
     const onAllClear = debounce(async () => {
         const { ios, android } = qrValue
         const peripheral = Platform.OS === 'android' ? android : ios
-        const test = await BleManager.isPeripheralConnected(peripheral, [])
         if (peripheral) {
             const isPeripheralConnected = await BleManager.isPeripheralConnected(
                 peripheral,
                 [],
             )
             if (isPeripheralConnected) {
+                console.log('isPeripheralConnected')
                 await onClearNoti(peripheral)
-                onDisconnect()
+                await onDisconnect()
             }
             onDisconnectService()
         }
@@ -256,19 +267,15 @@ const Main = () => {
         setSoundPlay(false)
     }
 
-    const onTriplePress = () => {
-        setTimeoutCount(timeoutCount + 1)
-        if (timeoutCount > 1) {
-            setTimeoutCount(0)
-        }
-    }
+
 
     const onConnectAndPrepare = async (uuid) => {
         const { sound } = await Audio.Sound.createAsync(
             require('../../../../assets/alarm_sound.mp3'),
         )
         setSoundState(sound)
-
+        const jsonValue = await AsyncStorage.getItem('@userData')
+        const { name, birth } = jsonValue !== {} ? JSON.parse(jsonValue) : {}
         const clearConnect = await BleManager.isPeripheralConnected(uuid, [])
         if (clearConnect) {
             await BleManager.disconnect(uuid)
@@ -279,11 +286,15 @@ const Main = () => {
             uuid,
             [],
         )
+
         if (isPeripheralConnected) {
             const info = await BleManager.retrieveServices(uuid)
+
             const { status, characteristic, service } = checkNotifyProperties(
                 info,
+                'Notify',
             )
+            const writeProperties = checkNotifyProperties(info, 'Write')
             if (status === 200) {
                 setFastened('01')
                 setServerConnectionStatus(true)
@@ -295,69 +306,93 @@ const Main = () => {
                 )
                 const fastenedQueue = []
 
-                // bleManagerEmitter.addListener(
-                //     'BleManagerDidUpdateValueForCharacteristic',
-                //     ({ value }) => {
-                //         const asciiCode = isEmptyASCII(value)
-                //
-                //         const result = JSON.stringify(
-                //             String.fromCharCode(...asciiCode),
-                //         )
-                //         // Convert bytes array to string
-                //         const { server, android } = qrValue
-                //         //fastenedState :
-                //         // 11 : normal connection
-                //         // 10 : Abnormal connection
-                //         // 01 : disConnected
-                //         // 00 : disConnected
-                //         const convertData = jsonParser(result)
-                //         const fastenedState = !isEmpty(result)
-                //             ? sensorDataParser(convertData)
-                //             : '-'
-                //         setFastened(fastenedState)
-                //         console.log(convertData, '@@@@@@@@@@@@@@@@@')
-                //         if (fastenedQueue.length > 2) {
-                //             fastenedQueue.shift()
-                //             fastenedQueue.push(fastenedState)
-                //         } else {
-                //             fastenedQueue.push(fastenedState)
-                //         }
-                //
-                //         if (fastenedState === '10') {
-                //             if (
-                //                 !soundPlay &&
-                //                 fastenedQueue.every((v) => v === '10')
-                //             ) {
-                //                 playSound(sound)
-                //             } else {
-                //                 stopSound(sound)
-                //             }
-                //         }
-                //
-                //         if (fastenedState !== '10' || !isEmpty(sound)) {
-                //             stopSound(sound)
-                //         }
-                //         const param = {
-                //             empName: name,
-                //             empBirth: date,
-                //             connected: true,
-                //             fastened: fastenedState,
-                //             battery: convertData?.battery,
-                //         }
-                //         fetchBluetoothData({
-                //             server,
-                //             resourceKey: android,
-                //             param,
-                //         })
-                //     },
-                // )
+                clearBluetoothDataTimer()
+                timerRef.current = setInterval(() => {
+                    BleManager.write(
+                        uuid,
+                        writeProperties.service,
+                        writeProperties.characteristic,
+                        [104, 101, 97, 108, 116, 104],
+                    )
+                        .then(() => {
+                            // Success code
+                            console.log('WriteSuccess')
+                        })
+                        .catch((error) => {
+                            // Failure code
+                            console.log(error)
+                        })
+                }, 3500)
+
+                bleManagerEmitter.addListener(
+                    'BleManagerDidUpdateValueForCharacteristic',
+                    ({ value }) => {
+                        const asciiCode = isEmptyASCII(value)
+
+                        const result = JSON.stringify(
+                            String.fromCharCode(...asciiCode),
+                        )
+                        // Convert bytes array to string
+                        const { server, android } = qrValue
+                        //fastenedState :
+                        // 11 : normal connection
+                        // 10 : Abnormal connection
+                        // 01 : disConnected
+                        // 00 : disConnected
+                        const convertData = jsonParser(result)
+                        const fastenedState = !isEmpty(result)
+                            ? sensorDataParser(convertData)
+                            : '-'
+                        setFastened(fastenedState)
+                        console.log(convertData, '@@@@@@@@@@@@@@@@@')
+                        if (fastenedQueue.length > 2) {
+                            fastenedQueue.shift()
+                            fastenedQueue.push(fastenedState)
+                        } else {
+                            fastenedQueue.push(fastenedState)
+                        }
+
+                        if (fastenedState === '10') {
+                            if (
+                                !soundPlay &&
+                                fastenedQueue.every((v) => v === '10')
+                            ) {
+                                playSound(sound)
+                            } else {
+                                stopSound(sound)
+                            }
+                        }
+
+                        if (fastenedState !== '10' || !isEmpty(sound)) {
+                            stopSound(sound)
+                        }
+                        const param = {
+                            empName: name,
+                            empBirth: birth,
+                            connected: true,
+                            fastened: fastenedState,
+                            battery: convertData?.battery,
+                            work : workStatusRef.current? 'work_start' : 'work_stop'
+                    }
+                        fetchBluetoothData({
+                            server,
+                            resourceKey: android,
+                            param,
+                        })
+                    },
+                )
             }
         }
     }
-
+    const onTriplePress = () => {
+        setTimeoutCount(timeoutCount + 1)
+        if (timeoutCount > 1) {
+            setTimeoutCount(0)
+        }
+    }
     const debounceOnConnectAndPrepare = debounce((value) => {
         onConnectAndPrepare(value)
-            .then((v) => {
+            .then(() => {
                 SuccessAlert()
                 if (timeoutCount > 1) {
                     setTimeoutCount(0)
@@ -365,10 +400,18 @@ const Main = () => {
                 setLoading(false)
             })
             .catch((e) => {
-                sensorErrorAlert(e, timeoutCount)
+                sensorErrorAlert(e, timeoutCount, onTriplePress)
                 onAllClear()
             })
     }, 200)
+
+    useEffect(()=>{
+
+        if(workStatusRef.current !== workStatus){
+            workStatusRef.current =  workStatus
+        }
+
+    },[workStatus])
 
     useEffect(() => {
         if (!qrErrorCheck(qrValue)) {
@@ -386,9 +429,9 @@ const Main = () => {
         BleManager.start({ showAlert: false })
         BleManager.checkState()
         bleManagerEmitter.addListener('BleManagerDisconnectPeripheral', () => {
-            if (serverConnectionStatus) {
-                onAllClear()
-            }
+            // if (serverConnectionStatus) {
+            onAllClear()
+            // }
         })
         permissionsAndroid()
         return () => {
@@ -434,8 +477,15 @@ const Main = () => {
             }
         }
     }, [appState])
+
     return (
         <>
+            <Spinner
+                visible={loading}
+                // textContent={'체결여부 검사중'}
+                overlayColor={'rgba(0, 0, 0, 0.7)'}
+                textStyle={{ color: 'white' }}
+            />
             <SButtongroupContainerView>
                 <ButtonGroup groupList={buttonGroupList} />
             </SButtongroupContainerView>
@@ -493,7 +543,13 @@ const Main = () => {
                         marginBottom: 15,
                         backgroundColor: colorSet.primary,
                     }}
-                    title={i18nt('work.start')}
+                    title={
+                        workStatus ? i18nt('work.stop') : i18nt('work.start')
+                    }
+                    disabled={!serverConnectionStatus}
+                    onPress={() => {
+                        setWorkStatus(!workStatus)
+                    }}
                 />
             </SView_ButtonGroup>
         </>

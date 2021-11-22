@@ -141,12 +141,12 @@ export const percentageCalc = (v, t) => {
     return (v * 100) / t
 }
 
-export const checkNotifyProperties = (info) => {
+export const checkNotifyProperties = (info, value = 'Notify') => {
     if (info?.characteristics) {
         const characteristic = info.characteristics
         return characteristic.reduce(
             (acc, datum) => {
-                if (Object.values(datum.properties).includes('Notify')) {
+                if (Object.values(datum.properties).includes(value)) {
                     acc = Object.assign({}, datum, { status: 200 })
                 }
                 return acc

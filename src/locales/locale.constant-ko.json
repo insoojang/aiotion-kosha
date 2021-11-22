@@ -17,12 +17,8 @@
         "bluetooth-reset" : "1) 센서 전원상태를 확인 해주세요.\n2) 블루투스를 껐다 켜보거나 앱을 재부팅 해보세요."
     },
     "common": {
-        "all": "전체",
-        "name": "이름",
-        "date-of-birth": "생년월일",
         "connection-status": "연결상태",
-        "fail-safe": "체결여부",
-        "enter-name": "이름을 입력해주세요"
+        "fail-safe": "체결여부"
     },
     "sensor": {
         "on": "연결됨",
@@ -56,7 +52,6 @@
         "sensor-error-408" : "센서 연결 시간초과"
     },
     "title": {
-        "qr": "QR/바코드",
         "main": "작업자 안전관리",
         "description" : "달비계 추락방지 센서 통신중...",
         "barometer": "기압계",
@@ -66,7 +61,8 @@
     "login": {
         "header": "작업자 입력",
         "name":"이름을 입력하세요.",
-        "date-of-birth": "생년월일을 입력하세요.(ex:YYMMDD)"
+        "date-of-birth": "생년월일을 입력하세요.(ex:YYMMDD)",
+        "back-login": "로그인 화면으로 이동하시겠습니까?"
     },
     "alarm": {
         "bluetooth-off": "블루투스가 OFF 상태입니다.",
