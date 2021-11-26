@@ -176,7 +176,9 @@ const Main = () => {
                     WarnAlert({
                         message: i18nt('action.connection-fail'),
                         error: e,
-                        state: setServerConnectionStatus,
+                        onPress: () => {
+                            setServerConnectionStatus(false)
+                        },
                     })
                 })
         }
@@ -378,7 +380,7 @@ const Main = () => {
                             work: workStatusRef.current
                                 ? 'work_start'
                                 : 'work_stop',
-                            atm: barometerRef,
+                            atm: barometerRef.current,
                         }
                         fetchBluetoothData({
                             server,

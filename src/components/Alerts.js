@@ -12,7 +12,7 @@ const SuccessAlert = (message) =>
             },
         ],
     )
-const WarnAlert = ({ message, error, state }) => {
+const WarnAlert = ({ message, error, onPress }) => {
     if (error) {
         console.error('[ERROR] : warnAlert', error)
     }
@@ -23,8 +23,8 @@ const WarnAlert = ({ message, error, state }) => {
             {
                 text: i18nt('action.ok'),
                 onPress: () => {
-                    if (state) {
-                        state(false)
+                    if (onPress) {
+                        onPress()
                     }
                 },
             },
