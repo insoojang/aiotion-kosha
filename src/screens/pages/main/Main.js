@@ -23,7 +23,7 @@ import ButtonGroup from '../../../components/ButtonGroup'
 import { i18nt } from '../../../utils/i18n'
 import StateBar from '../../../components/StateBar'
 import { SButtongroupContainerView } from '../../../components/ButtonGroupStyle'
-import { Button, Divider } from 'react-native-elements'
+import { Divider } from 'react-native-elements'
 import { permissionsAndroid } from '../../../utils/permissions'
 import { SCREEN } from '../../../navigation/constants'
 import { SuccessAlert, WarnAlert } from '../../../components/Alerts'
@@ -45,19 +45,13 @@ import {
     qrErrorCheck,
     typeOfFastened,
 } from '../../../utils/common'
-import { fontSizeSet } from '../../../styles/size'
-import { colorSet } from '../../../styles/colors'
 import { clearUuid } from '../../../redux/reducers'
-import { saveBluetooteData } from '../../../service/api/bluetooth.service'
+import { saveBluetoothData } from '../../../service/api/bluetooth.service'
 import { useDispatch, useSelector } from 'react-redux'
 import useAppState from '../../../utils/useAppState'
 import { jsonParser, sensorDataParser } from '../../../utils/parser'
-import {
-    delayFunction,
-    fetchBluetoothData,
-    launchFunction,
-    sensorErrorAlert,
-} from './func'
+import { delayFunction, launchFunction, sensorErrorAlert } from './func'
+import CircleButtonComponent from '../../../components/CircleButtonComponent'
 
 const BleManagerModule = NativeModules.BleManager
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule)
@@ -164,7 +158,7 @@ const Main = () => {
                 connected: false,
                 fastened: '00',
             }
-            saveBluetooteData({
+            saveBluetoothData({
                 url: server,
                 resourceKey: android,
                 param,
@@ -173,6 +167,7 @@ const Main = () => {
                     console.log('onDisconnectService Success')
                 })
                 .catch((e) => {
+                    console.log('[disconnect Error]', e)
                     WarnAlert({
                         message: i18nt('action.connection-fail'),
                         error: e,
@@ -212,9 +207,13 @@ const Main = () => {
                 [],
             )
             if (isPeripheralConnected) {
+                try {
+                    await onClearNoti(peripheral)
+                    await onDisconnect()
+                } catch (e) {
+                    console.error('[ERROR] onAllClear : ', e)
+                }
                 console.log('isPeripheralConnected')
-                await onClearNoti(peripheral)
-                await onDisconnect()
             }
             onDisconnectService()
         }
@@ -326,7 +325,7 @@ const Main = () => {
                             // Failure code
                             console.log(error)
                         })
-                }, 3500)
+                }, 5000)
 
                 bleManagerEmitter.addListener(
                     'BleManagerDidUpdateValueForCharacteristic',
@@ -382,11 +381,18 @@ const Main = () => {
                                 : 'work_stop',
                             atm: barometerRef.current,
                         }
-                        fetchBluetoothData({
-                            server,
+                        saveBluetoothData({
+                            url: server,
                             resourceKey: android,
                             param,
                         })
+                            .then(() => {
+                                console.log('service Success')
+                            })
+                            .catch((e) => {
+                                onAllClear()
+                                console.error(e)
+                            })
                     },
                 )
             }
@@ -426,7 +432,7 @@ const Main = () => {
 
     useEffect(() => {
         if (!qrErrorCheck(qrValue)) {
-            const { ios, android, server } = qrValue
+            const { ios, android } = qrValue
             //TODO DFU
             // if (serverConnectionStatus) {
             //     fetchVersionData(server)
@@ -554,20 +560,33 @@ const Main = () => {
                 </ScrollView>
             </TouchableWithoutFeedback>
             <SView_ButtonGroup>
-                <Button
-                    buttonStyle={{
-                        height: 50,
-                        fontSize: fontSizeSet.base,
-                        marginBottom: 15,
-                        backgroundColor: colorSet.primary,
+                {/*<Button*/}
+                {/*    buttonStyle={{*/}
+                {/*        height: 50,*/}
+                {/*        fontSize: fontSizeSet.base,*/}
+                {/*        marginBottom: 15,*/}
+                {/*        backgroundColor: colorSet.primary,*/}
+                {/*    }}*/}
+                {/*    title={*/}
+                {/*        workStatus ? i18nt('work.stop') : i18nt('work.start')*/}
+                {/*    }*/}
+                {/*    disabled={!serverConnectionStatus}*/}
+                {/*    onPress={() => {*/}
+                {/*        setWorkStatus(!workStatus)*/}
+                {/*    }}*/}
+                {/*/>*/}
+                <CircleButtonComponent
+                    width={250}
+                    height={250}
+                    isOn={workStatus}
+                    disabled={!serverConnectionStatus}
+                    onToggle={() => {
+                        setWorkStatus(!workStatus)
                     }}
+                    titleStyle={{ fontSize: 25 }}
                     title={
                         workStatus ? i18nt('work.stop') : i18nt('work.start')
                     }
-                    disabled={!serverConnectionStatus}
-                    onPress={() => {
-                        setWorkStatus(!workStatus)
-                    }}
                 />
             </SView_ButtonGroup>
         </>

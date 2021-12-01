@@ -38,7 +38,7 @@ import {
 } from '../../utils/common'
 import {
     getFirmwareVersion,
-    saveBluetooteData,
+    saveBluetoothData,
 } from '../../service/api/bluetooth.service'
 import { fontSizeSet } from '../../styles/size'
 import { colorSet } from '../../styles/colors'
@@ -218,7 +218,7 @@ const Bluetooth = () => {
     }
 
     const fetchBluetoothData = ({ server, resourceKey, param }) => {
-        saveBluetooteData({
+        saveBluetoothData({
             url: server,
             resourceKey,
             param,
@@ -261,7 +261,7 @@ const Bluetooth = () => {
                 connected: false,
                 fastened: '00',
             }
-            saveBluetooteData({
+            saveBluetoothData({
                 url: server,
                 resourceKey: android,
                 param,

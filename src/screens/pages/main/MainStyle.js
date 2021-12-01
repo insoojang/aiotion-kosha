@@ -19,7 +19,6 @@ export const SSensorListTitleView = styled(Text)`
 SSensorListTitleView.displayName = 'SSensorListTitleView'
 
 export const SInfoView = styled.View`
-    flex: 7.5;
     padding: 10px 20px;
     justify-content: space-between;
 `
@@ -71,8 +70,9 @@ export const SView_ContractState = styled.Text`
 SView_ContractState.displayName = 'SView_ContractState'
 
 export const SView_ButtonGroup = styled.View`
-    flex: 2.5;
+    flex: 10;
     justify-content: center;
-    padding: 0 20px;
+    align-items: center;
+    margin-bottom: 70px;
 `
 SView_ButtonGroup.displayName = 'SView_ButtonGroup'

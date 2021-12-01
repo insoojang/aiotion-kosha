@@ -1,4 +1,3 @@
-import { saveBluetooteData } from '../../../service/api/bluetooth.service'
 import { i18nt } from '../../../utils/i18n'
 import { WarnAlert } from '../../../components/Alerts'
 
@@ -9,25 +8,10 @@ export const launchFunction = async (promise) => {
     let timeout = new Promise((resolve, reject) => {
         timerId = setTimeout(() => {
             reject('408')
-        }, 5000)
+        }, 3000)
     })
 
     return Promise.race([promise(), timeout])
-}
-
-export const fetchBluetoothData = ({ server, resourceKey, param }) => {
-    saveBluetooteData({
-        url: server,
-        resourceKey,
-        param,
-    })
-        .then(() => {
-            console.log('service Success')
-        })
-        .catch((e) => {
-            onAllClear()
-            console.error(e)
-        })
 }
 
 export const delayFunction = async () => {
@@ -36,16 +20,18 @@ export const delayFunction = async () => {
     return new Promise((resolve) => {
         closeTimerId = setTimeout(() => {
             resolve()
-        }, 3000)
+        }, 1000)
     })
 }
 
-export const sensorErrorAlert = (e, timeoutCount = 0, state) => {
+export const sensorErrorAlert = (e, timeoutCount = 0, onPress) => {
     if (e === '408') {
         WarnAlert({
             message: i18nt(`error.sensor-error-${e}`),
             content: timeoutCount === 2 ? i18nt(`action.bluetooth-reset`) : '',
-            state: state(),
+            state: () => {
+                onPress(false)
+            },
         })
     } else if (e === '404' || e === '500') {
         WarnAlert({
