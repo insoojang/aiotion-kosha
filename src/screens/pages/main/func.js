@@ -8,7 +8,7 @@ export const launchFunction = async (promise) => {
     let timeout = new Promise((resolve, reject) => {
         timerId = setTimeout(() => {
             reject('408')
-        }, 3000)
+        }, 3500)
     })
 
     return Promise.race([promise(), timeout])

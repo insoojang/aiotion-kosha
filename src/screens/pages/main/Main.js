@@ -1,12 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import {
-    Alert,
-    Keyboard,
-    NativeModules,
-    Platform,
-    ScrollView,
-    TouchableWithoutFeedback,
-} from 'react-native'
+import { Alert, Keyboard, NativeModules, Platform, ScrollView, TouchableWithoutFeedback } from 'react-native'
 import NativeEventEmitter from 'react-native/Libraries/EventEmitter/NativeEventEmitter'
 import { Camera } from 'expo-camera'
 import { useNavigation } from '@react-navigation/native'
@@ -28,14 +21,14 @@ import { permissionsAndroid } from '../../../utils/permissions'
 import { SCREEN } from '../../../navigation/constants'
 import { SuccessAlert, WarnAlert } from '../../../components/Alerts'
 import {
-    SView_ContractState,
     SInfoDetailView,
     SInfoView,
-    SText_Label,
     SText_ConnectState,
-    SView_ConnectStateWrap,
-    SView_ContractStateWrap,
+    SText_Label,
     SView_ButtonGroup,
+    SView_ConnectStateWrap,
+    SView_ContractState,
+    SView_ContractStateWrap,
 } from './MainStyle'
 import {
     checkDevice,
@@ -309,24 +302,6 @@ const Main = () => {
                 )
                 const fastenedQueue = []
 
-                clearBluetoothDataTimer()
-                timerRef.current = setInterval(() => {
-                    BleManager.write(
-                        uuid,
-                        writeProperties.service,
-                        writeProperties.characteristic,
-                        [104, 101, 97, 108, 116, 104],
-                    )
-                        .then(() => {
-                            // Success code
-                            console.log('WriteSuccess')
-                        })
-                        .catch((error) => {
-                            // Failure code
-                            console.log(error)
-                        })
-                }, 5000)
-
                 bleManagerEmitter.addListener(
                     'BleManagerDidUpdateValueForCharacteristic',
                     ({ value }) => {
@@ -381,6 +356,20 @@ const Main = () => {
                                 : 'work_stop',
                             atm: barometerRef.current,
                         }
+                        BleManager.write(
+                            uuid,
+                            writeProperties.service,
+                            writeProperties.characteristic,
+                            [104, 101, 97, 108, 116, 104],
+                        )
+                            .then(() => {
+                                // Success code
+                                console.log('WriteSuccess')
+                            })
+                            .catch((error) => {
+                                // Failure code
+                                console.log(error)
+                            })
                         saveBluetoothData({
                             url: server,
                             resourceKey: android,
@@ -462,7 +451,7 @@ const Main = () => {
             // onAllClear()
         }
     }, [])
-
+    
     //Background mode
     useEffect(() => {
         if (!isEmpty(appState)) {
@@ -471,7 +460,9 @@ const Main = () => {
                 !isEmpty(fastened) &&
                 (fastened === '10' || fastened === '11')
             ) {
+
                 console.log('background Mode', fastened)
+
                 // const sleep = (time) =>
                 //     new Promise((resolve) => setTimeout(() => resolve(), time))
                 // const { server, android } = qrValue
