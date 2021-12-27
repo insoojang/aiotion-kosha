@@ -576,14 +576,14 @@ const Main = () => {
                 {/*    }}*/}
                 {/*/>*/}
                 <CircleButtonComponent
-                    width={250}
-                    height={250}
+                    width={180}
+                    height={180}
                     isOn={workStatus}
                     disabled={!serverConnectionStatus}
                     onToggle={() => {
                         setWorkStatus(!workStatus)
                     }}
-                    titleStyle={{ fontSize: 25 }}
+                    titleStyle={{ fontSize: 23 }}
                     title={
                         workStatus ? i18nt('work.stop') : i18nt('work.start')
                     }

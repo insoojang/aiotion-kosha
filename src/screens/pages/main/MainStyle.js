@@ -70,7 +70,7 @@ export const SView_ContractState = styled.Text`
 SView_ContractState.displayName = 'SView_ContractState'
 
 export const SView_ButtonGroup = styled.View`
-    flex: 10;
+    flex: 2;
     justify-content: center;
     align-items: center;
     margin-bottom: 70px;

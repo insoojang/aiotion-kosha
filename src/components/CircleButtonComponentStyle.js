@@ -45,7 +45,7 @@ export const ToggleButtonInner = styled.View.attrs((props) => ({
 ToggleButtonInner.displayName = 'ToggleButtonInner'
 
 export const ToggleButtonTitle = styled.Text`
-    margin-top: 20px;
+    margin-top: 10px;
     font-size: ${fontSizeSet.base}px;
 `
 ToggleButtonTitle.displayName = 'ToggleButtonTitle'

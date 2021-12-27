@@ -53,8 +53,8 @@ const CircleButtonComponent = (props) => {
                     }}
                 >
                     <PowerOff
-                        width={width - 150}
-                        height={height - 150}
+                        width={width - 90}
+                        height={height - 90}
                         fill={
                             disabled ? colorSet.disableText : powerStyle(isOn)
                         }
