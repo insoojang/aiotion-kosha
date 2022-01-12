@@ -14,7 +14,7 @@ const sensorDataParser = (value) => {
     // if (proximity_sensor > 16360) {
     //     return '3'
     // } else
-    if (proximity_sensor > 6200) {
+    if (proximity_sensor > 6000) {
         sensorData.push('1')
     } else {
         sensorData.push('0')

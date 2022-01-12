@@ -2,14 +2,14 @@
   "expo": {
     "name": "aiotion-kosha",
     "slug": "aiotion-kosha",
-    "version": "3.0.1",
+    "version": "3.0.2",
     "icon": "./assets/icon.png",
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "bundleIdentifier": "io.aiotion.kosha.app",
-      "buildNumber": "2.0",
+      "buildNumber": "3.0",
       "supportsTablet": true,
       "infoPlist": {
         "CFBundleAllowMixedLocalizations": true,
@@ -23,7 +23,7 @@
     },
     "android": {
       "package": "com.reactnativeble",
-      "versionCode": 9,
+      "versionCode": 10,
       "icon": "./assets/adaptive-icon.png",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
