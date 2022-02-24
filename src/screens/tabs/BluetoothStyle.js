@@ -20,13 +20,13 @@ SInfoView.displayName = 'SInfoView'
 export const SInfoDetailView = styled.View``
 SInfoDetailView.displayName = 'SInfoDetailView'
 
-export const SText_label = styled.Text`
-  margin-bottom: 10px;
+export const SText_Label = styled.Text`
+  margin: 10px 0;
   color: ${colorSet.normalTextColor};
   font-size: ${fontSizeSet.base}px;
   font-weight: bold;
 `
-SText_label.displayName = 'SText_label'
+SText_Label.displayName = 'SText_Label'
 
 export const SView_ConnectStateWrap = styled.View`
   border-width: 1px;
@@ -44,10 +44,26 @@ export const SText_ConnectState = styled.Text`
 `
 SText_ConnectState.displayName = 'SText_ConnectState'
 
-export const SView_buttonGroup = styled.View`
+export const SView_ContractStateWrap = styled.View`
+  align-items: center;
+  padding: 10px;
+  border-width: 1px;
+  border-radius: 4px;
+  border-color: ${(props) => props.borderColor};
+  background: ${(props) => props.backgroundColor};
+`
+SView_ContractStateWrap.displayName = 'SView_ContractStateWrap'
+
+export const SView_ContractState = styled.Text`
+  text-align: center;
+  font-size: ${fontSizeSet.base}px;
+`
+SView_ContractState.displayName = 'SView_ContractState'
+
+export const SView_ButtonGroup = styled.View`
   flex: 1;
   justify-content: center;
   padding: 0 20px;
 
 `
-SView_buttonGroup.displayName = 'SView_buttonGroup'
+SView_ButtonGroup.displayName = 'SView_ButtonGroup'
