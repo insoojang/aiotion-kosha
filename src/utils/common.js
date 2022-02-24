@@ -8,9 +8,11 @@ export const qrErrorCheck = (value) => {
     switch (true) {
         case isEmpty(value):
             return true
-        case Object.keys(value).length !== 3:
+        case Object.keys(value).length !== 4:
             return true
-        case !value.hasOwnProperty('uuid'):
+        case !value.hasOwnProperty('ios'):
+            return true
+        case !value.hasOwnProperty('android'):
             return true
         case !value.hasOwnProperty('resourceId'):
             return true

@@ -1,7 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 const QR_STATE = {
-    uuid: '',
+    android: '',
+    ios: '',
     resourceId: '',
     server: '',
 }

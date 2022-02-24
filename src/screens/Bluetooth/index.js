@@ -265,6 +265,92 @@ const Bluetooth = ({}) => {
         } else {
             warnAlert()
         }
+        if (isEmpty(peripheral) || connectionState) {
+            warnAlert()
+            return
+        }
+
+        try {
+            await BleManager.connect(peripheral)
+            await BleManager.retrieveServices(peripheral).then(async () => {
+                setTimeout(
+                    async () =>
+                        await BleManager.startNotification(
+                            peripheral,
+                            Platform.OS === 'android' ? 'fff0' : '0xFFF0',
+                            Platform.OS === 'android' ? 'fff2' : '0xFFF2',
+                        ),
+                    3000,
+                )
+            })
+            setFastened('01')
+            setConnectionState(true)
+            successAlert()
+            bleManagerEmitter.addListener(
+                'BleManagerDidUpdateValueForCharacteristic',
+                ({ value }) => {
+                    // Convert bytes array to string
+                    const { resourceId, server } = qrValue
+                    //fastenedState :
+                    // 11 : normal connection
+                    // 10 : Abnormal connection
+                    // 01 : disConnected
+                    // 00 : disConnected
+                    const fastenedState = !isEmpty(value)
+                        ? String.fromCharCode(...value)
+                        : '-'
+                    setFastened(fastenedState)
+                    const param = {
+                        empName: name,
+                        empBirth: date,
+                        connected: true,
+                        fastened: fastenedState,
+                    }
+                    saveBluetooteData({
+                        url: server,
+                        resourceId,
+                        param,
+                    })
+                        .then((r) => {
+                            typeOfFastened(fastenedState)
+                            console.log('service Success', r)
+                        })
+                        .catch((e) => {
+                            console.error(e)
+                            onClear()
+                            onDisconnect(qrValue, i18nt('error.server'))
+                        })
+                },
+            )
+        } catch (e) {
+            console.error(e)
+            onClear()
+            onDisconnect(qrValue, i18nt('action.connection-fail'))
+        }
+    }
+
+    const onDisconnectService = (value) => {
+        bleManagerEmitter.addListener('BleManagerDisconnectPeripheral', () => {
+            onClear()
+            const { resourceId, server } = value
+            const param = {
+                empName: name,
+                empBirth: date,
+                connected: false,
+                fastened: '00',
+            }
+            saveBluetooteData({
+                url: server,
+                resourceId,
+                param,
+            })
+                .then((r) => {
+                    console.log('service Success', r)
+                })
+                .catch((e) => {
+                    warnAlert(i18nt('action.connection-fail'), e)
+                })
+        })
     }
 
     useEffect(() => {
